@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SADAME@WIRED</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SCREEN 1: Boot Sequence -->
+  <div id="screen1" class="screen active">
+    <div id="bg-image" class="bg-image"></div>
+    <div class="overlay"></div>
+    <div id="boot-text" class="boot-text"></div>
+  </div>
+
+  <!-- SCREEN 2: Terminal Hub -->
+  <div id="screen2" class="screen">
+    <div class="bg-image"></div>
+    <div class="overlay"></div>
+    <div class="scanlines"></div>
+    <div class="terminal-window">
+      <div class="terminal-titlebar">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+        <span class="terminal-title">SADAME@WIRED:~</span>
+      </div>
+      <div class="terminal-body">
+        <div id="terminal-output"></div>
+        <span class="cursor">█</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
