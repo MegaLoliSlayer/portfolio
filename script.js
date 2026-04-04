@@ -29,28 +29,30 @@ const GIF_FILES = [
   'lain18.gif',  'lain19.gif', 'lain20.gif',
 ];
 
-// Peripheral viewport zones [left vw, top vh] surrounding the centered terminal
+// Peripheral viewport zones [left vw, top vh] — spaced so GIFs only touch at corners.
+// Spacing: ~14vw horizontal (top), ~16vw (bottom), ~22vh vertical (sides).
+// At max 280px GIFs this means ≤~12px corner overlap on top, none on bottom/sides.
 const GIF_ZONES = [
-  // top row
-  [ 3,  3], [15,  5], [28,  3], [42,  4], [57,  3], [70,  5], [83,  3],
-  // left column
-  [ 2, 22], [ 3, 42], [ 2, 62],
-  // right column
-  [85, 22], [86, 42], [84, 62],
-  // bottom row
-  [ 7, 80], [22, 83], [38, 82], [54, 83], [68, 81], [82, 80],
+  // top row (7) — every ~14vw
+  [ 1,  2], [15,  2], [29,  2], [43,  2], [57,  2], [71,  2], [85,  2],
+  // right column (3) — every ~22vh, x anchored to right
+  [84, 27], [84, 49], [84, 70],
+  // bottom row (6) — every ~16vw
+  [ 1, 75], [17, 75], [33, 75], [50, 75], [66, 75], [82, 75],
+  // left column (3) — every ~22vh, x anchored to left
+  [ 2, 27], [ 2, 49], [ 2, 70],
 ];
 
 function spawnGifs() {
-  const minSize = 180;
-  const maxSize = 320; // max < 2× min
+  const minSize = 160;
+  const maxSize = 280; // max < 2× min; keeps corner-only overlap at this zone spacing
 
   const shuffled = [...GIF_FILES].sort(() => Math.random() - 0.5);
 
   shuffled.forEach((file, i) => {
     const [baseL, baseT] = GIF_ZONES[i % GIF_ZONES.length];
-    const left = baseL + (Math.random() * 6 - 3);
-    const top  = baseT + (Math.random() * 6 - 3);
+    const left = baseL + (Math.random() * 2 - 1); // ±1vw jitter only
+    const top  = baseT + (Math.random() * 2 - 1); // ±1vh jitter only
     const size = minSize + Math.floor(Math.random() * (maxSize - minSize + 1));
 
     const img = document.createElement('img');
