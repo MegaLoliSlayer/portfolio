@@ -22,15 +22,23 @@ function wait(ms) {
 
 // ─── Lain GIF Sprites ────────────────────────────────────────
 const GIF_FILES = [
-  'lain1.webp', 'lain2.gif', 'lain3.gif', 'lain4.gif',
-  'lain6.gif',  'lain7.gif', 'lain8.gif', 'lain9.gif',
-  'lain10.gif', 'lain11.gif',
+  'lain1.webp',  'lain2.gif',  'lain3.gif',  'lain4.gif',
+  'lain6.gif',   'lain7.gif',  'lain8.gif',  'lain9.gif',
+  'lain10.gif',  'lain11.gif', 'lain12.gif', 'lain13.gif',
+  'lain14.gif',  'lain15.gif', 'lain16.gif', 'lain17.gif',
+  'lain18.gif',  'lain19.gif', 'lain20.gif',
 ];
 
-// Peripheral viewport zones [left%, top%] that surround the centered terminal
+// Peripheral viewport zones [left vw, top vh] surrounding the centered terminal
 const GIF_ZONES = [
-  [ 3,  4], [20,  7], [44,  3], [65,  5], [81,  4],
-  [85, 36], [80, 72], [55, 83], [28, 81], [ 7, 70],
+  // top row
+  [ 3,  3], [15,  5], [28,  3], [42,  4], [57,  3], [70,  5], [83,  3],
+  // left column
+  [ 2, 22], [ 3, 42], [ 2, 62],
+  // right column
+  [85, 22], [86, 42], [84, 62],
+  // bottom row
+  [ 7, 80], [22, 83], [38, 82], [54, 83], [68, 81], [82, 80],
 ];
 
 function spawnGifs() {
