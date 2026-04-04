@@ -58,3 +58,42 @@ async function runBootSequence() {
   await wait(100);
   runTerminalSequence();
 }
+
+// ─── Screen 2: Terminal Hub ───────────────────────────────────
+async function runTerminalSequence() {
+  const screen2 = document.getElementById('screen2');
+  const output  = document.getElementById('terminal-output');
+
+  screen2.classList.add('active');
+
+  await wait(200);
+
+  // Type the whoami command and response
+  await typeText(output, 'SADAME@WIRED:~$ ', 35);
+  await typeText(output, 'whoami', 80);
+  await wait(200);
+  await typeText(output, '\n> SADAME — connected to the wired\n\n', 30);
+  await wait(300);
+
+  // Type the ls command
+  await typeText(output, 'SADAME@WIRED:~$ ', 35);
+  await typeText(output, 'ls ./connections\n', 80);
+  await wait(200);
+
+  // Reveal each link line one by one
+  for (const link of LINKS) {
+    const anchor = document.createElement('a');
+    anchor.className = 'term-link';
+    anchor.href      = link.url;
+    anchor.target    = '_blank';
+    anchor.rel       = 'noopener noreferrer';
+    output.appendChild(anchor);
+
+    await typeText(anchor, link.label, 22);
+    await wait(80);
+    output.appendChild(document.createTextNode('\n'));
+  }
+}
+
+// ─── Start ────────────────────────────────────────────────────
+runBootSequence();
