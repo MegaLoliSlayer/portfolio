@@ -215,7 +215,7 @@ html, body {
 
 .lain-gif {
   position: fixed;
-  z-index: 10;
+  z-index: 2;
   pointer-events: none;
   opacity: 0;
   border-radius: 3px;

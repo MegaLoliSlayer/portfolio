@@ -43,27 +43,47 @@ const GIF_ZONES = [
   [ 2, 27], [ 2, 49], [ 2, 70],
 ];
 
+// lain14 and lain15 have dedicated positions flanking the terminal.
+// Terminal right edge ≈ 68vw, left edge ≈ 32vw on a typical 1920px screen.
+const SPECIAL_POSITIONS = {
+  'lain14.gif': { left: 11, top: 35 }, // left of terminal, clear of left-col GIFs (x=2)
+  'lain15.gif': { left: 68, top: 35 }, // right of terminal, clear of right-col GIFs (x=84)
+};
+
+function createGif(file, left, top, size, delay) {
+  const screen2 = document.getElementById('screen2');
+  const img = document.createElement('img');
+  img.src       = file;
+  img.className = 'lain-gif';
+  img.style.width = size + 'px';
+  img.style.left  = left + 'vw';
+  img.style.top   = top  + 'vh';
+  screen2.appendChild(img);
+  setTimeout(() => img.classList.add('visible'), delay);
+}
+
 function spawnGifs() {
   const minSize = 220;
   const maxSize = 400; // max < 2× min
 
-  const shuffled = [...GIF_FILES].sort(() => Math.random() - 0.5);
+  // Place lain14 and lain15 at their fixed flanking positions first
+  let delay = 0;
+  for (const [file, pos] of Object.entries(SPECIAL_POSITIONS)) {
+    const size = minSize + Math.floor(Math.random() * (maxSize - minSize + 1));
+    createGif(file, pos.left, pos.top, size, delay);
+    delay += 130;
+  }
+
+  // Shuffle and place remaining GIFs into perimeter zones
+  const zoneFiles = GIF_FILES.filter(f => !(f in SPECIAL_POSITIONS));
+  const shuffled  = [...zoneFiles].sort(() => Math.random() - 0.5);
 
   shuffled.forEach((file, i) => {
     const [baseL, baseT] = GIF_ZONES[i % GIF_ZONES.length];
-    const left = baseL + (Math.random() * 2 - 1); // ±1vw jitter only
-    const top  = baseT + (Math.random() * 2 - 1); // ±1vh jitter only
+    const left = baseL + (Math.random() * 2 - 1);
+    const top  = baseT + (Math.random() * 2 - 1);
     const size = minSize + Math.floor(Math.random() * (maxSize - minSize + 1));
-
-    const img = document.createElement('img');
-    img.src       = file;
-    img.className = 'lain-gif';
-    img.style.width = size + 'px';
-    img.style.left  = left + 'vw';
-    img.style.top   = top  + 'vh';
-    document.body.appendChild(img);
-
-    setTimeout(() => img.classList.add('visible'), i * 130);
+    createGif(file, left, top, size, delay + i * 130);
   });
 }
 
