@@ -34,8 +34,8 @@ const GIF_ZONES = [
 ];
 
 function spawnGifs() {
-  const minSize = 80;
-  const maxSize = 150; // max < 2× min
+  const minSize = 180;
+  const maxSize = 320; // max < 2× min
 
   const shuffled = [...GIF_FILES].sort(() => Math.random() - 0.5);
 
