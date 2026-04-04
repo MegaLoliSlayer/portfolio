@@ -56,3 +56,31 @@ html, body {
   background: rgba(0, 0, 0, 0.65);
   z-index: 1;
 }
+
+/* ─── Screen 1: Boot Text ────────────────────────── */
+.boot-text {
+  position: relative;
+  z-index: 2;
+  color: var(--accent);
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  line-height: 2;
+  text-align: left;
+  width: min(640px, 90vw);
+  text-shadow: 0 0 8px var(--accent);
+  white-space: pre;
+}
+
+/* ─── Scanlines overlay ──────────────────────────── */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+}
