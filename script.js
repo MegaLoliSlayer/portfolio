@@ -4,8 +4,10 @@
 function typeText(element, text, speed = 40) {
   return new Promise(resolve => {
     let i = 0;
+    let accumulated = element.textContent;
     const interval = setInterval(() => {
-      element.textContent += text[i];
+      accumulated += text[i];
+      element.textContent = accumulated;
       i++;
       if (i >= text.length) {
         clearInterval(interval);
