@@ -4,10 +4,8 @@
 function typeText(element, text, speed = 40) {
   return new Promise(resolve => {
     let i = 0;
-    let accumulated = element.textContent;
     const interval = setInterval(() => {
-      accumulated += text[i];
-      element.textContent = accumulated;
+      element.insertAdjacentText('beforeend', text[i]);
       i++;
       if (i >= text.length) {
         clearInterval(interval);
@@ -98,4 +96,4 @@ async function runTerminalSequence() {
 }
 
 // ─── Start ────────────────────────────────────────────────────
-runBootSequence();
+runBootSequence().catch(console.error);

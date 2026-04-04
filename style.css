@@ -38,7 +38,7 @@ html, body {
 
 .screen.active {
   opacity: 1;
-  pointer-events: all;
+  pointer-events: auto;
 }
 
 /* ─── Background Image ───────────────────────────── */
