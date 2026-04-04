@@ -20,6 +20,43 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ─── Lain GIF Sprites ────────────────────────────────────────
+const GIF_FILES = [
+  'lain1.webp', 'lain2.gif', 'lain3.gif', 'lain4.gif',
+  'lain6.gif',  'lain7.gif', 'lain8.gif', 'lain9.gif',
+  'lain10.gif', 'lain11.gif',
+];
+
+// Peripheral viewport zones [left%, top%] that surround the centered terminal
+const GIF_ZONES = [
+  [ 3,  4], [20,  7], [44,  3], [65,  5], [81,  4],
+  [85, 36], [80, 72], [55, 83], [28, 81], [ 7, 70],
+];
+
+function spawnGifs() {
+  const minSize = 80;
+  const maxSize = 150; // max < 2× min
+
+  const shuffled = [...GIF_FILES].sort(() => Math.random() - 0.5);
+
+  shuffled.forEach((file, i) => {
+    const [baseL, baseT] = GIF_ZONES[i % GIF_ZONES.length];
+    const left = baseL + (Math.random() * 6 - 3);
+    const top  = baseT + (Math.random() * 6 - 3);
+    const size = minSize + Math.floor(Math.random() * (maxSize - minSize + 1));
+
+    const img = document.createElement('img');
+    img.src       = file;
+    img.className = 'lain-gif';
+    img.style.width = size + 'px';
+    img.style.left  = left + 'vw';
+    img.style.top   = top  + 'vh';
+    document.body.appendChild(img);
+
+    setTimeout(() => img.classList.add('visible'), i * 130);
+  });
+}
+
 // ─── Platform Links ───────────────────────────────────────────
 // Replace each URL with your actual profile link.
 const LINKS = [
@@ -92,6 +129,9 @@ async function runTerminalSequence() {
     await wait(80);
     output.appendChild(document.createTextNode('\n'));
   }
+
+  // Spawn Lain GIFs around the terminal after links are revealed
+  spawnGifs();
 }
 
 // ─── Start ────────────────────────────────────────────────────
