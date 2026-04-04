@@ -23,13 +23,12 @@ function wait(ms) {
 // ─── Platform Links ───────────────────────────────────────────
 // Replace each URL with your actual profile link.
 const LINKS = [
-  { label: '[01] GitHub        ── source code', url: 'https://github.com/YOUR_USERNAME' },
-  { label: '[02] LinkedIn      ── professional', url: 'https://linkedin.com/in/YOUR_USERNAME' },
-  { label: '[03] Steam         ── gaming',       url: 'https://steamcommunity.com/id/YOUR_USERNAME' },
-  { label: '[04] NetEase Music ── music',        url: 'https://music.163.com/#/user/home?id=YOUR_ID' },
-  { label: '[05] MyAnimeList   ── anime',        url: 'https://myanimelist.net/profile/YOUR_USERNAME' },
-  { label: '[06] Spotify       ── playlists',    url: 'https://open.spotify.com/user/YOUR_USERNAME' },
-  { label: '[07] PlayStation   ── trophies',     url: 'https://psnprofiles.com/YOUR_USERNAME' },
+  { label: '[01] GitHub        ── source code', url: 'https://github.com/MegaLoliSlayer' },
+  { label: '[02] Steam         ── gaming',      url: 'https://steamcommunity.com/id/MegaLoliSlayer/' },
+  { label: '[03] NetEase Music ── music',       url: 'https://music.163.com/playlist?id=2970962753&uct2=U2FsdGVkX18R6AjtMreh49ZCQBC5vxa9J6phSrEPocg=' },
+  { label: '[04] MyAnimeList   ── anime',       url: 'https://myanimelist.net/profile/MegaLoliSlayer' },
+  { label: '[05] Spotify       ── playlists',   url: 'https://open.spotify.com/playlist/5sWG2t5DumbG1jb8zD2HJ0?si=e986dda700e1443e&nd=1&dlsi=8ebdc819db284c27' },
+  { label: '[06] PlayStation   ── trophies',    url: 'https://profile.playstation.com/MEGA_Dropkick2' },
 ];
 
 // ─── Screen 1: Boot Sequence ──────────────────────────────────
