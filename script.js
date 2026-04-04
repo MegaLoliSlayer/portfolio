@@ -44,8 +44,8 @@ const GIF_ZONES = [
 ];
 
 function spawnGifs() {
-  const minSize = 160;
-  const maxSize = 280; // max < 2× min; keeps corner-only overlap at this zone spacing
+  const minSize = 220;
+  const maxSize = 400; // max < 2× min
 
   const shuffled = [...GIF_FILES].sort(() => Math.random() - 0.5);
 
