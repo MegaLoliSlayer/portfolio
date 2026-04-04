@@ -171,9 +171,37 @@ html, body {
 /* Terminal body */
 .terminal-body {
   padding: 20px 22px 18px;
-  min-height: 300px;
+  min-height: 200px;
+  max-height: 55vh;
+  overflow-y: auto;
   font-size: clamp(0.85rem, 1.8vw, 1rem);
   line-height: 1.8;
+  scroll-behavior: smooth;
+}
+
+/* Input line */
+.terminal-input-line {
+  display: none;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.terminal-input-line .prompt {
+  color: var(--accent);
+  white-space: pre;
+  flex-shrink: 0;
+  text-shadow: 0 0 6px var(--accent);
+}
+
+#terminal-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: inherit;
+  caret-color: var(--accent);
+  width: 100%;
 }
 
 #terminal-output {
