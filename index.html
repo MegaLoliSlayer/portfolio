@@ -84,6 +84,7 @@
       <!-- Terminal window -->
       <div class="terminal-window">
         <div class="terminal-titlebar">
+          <span class="dot dot-red terminal-dot" onclick="closeTerminal()" title="Close">&#10005;</span>
           <span class="dot dot-yellow terminal-dot" onclick="minimizeTerminal()" title="Minimize">&#8722;</span>
           <span class="dot dot-green terminal-dot" onclick="restoreTerminal()" title="Restore">&#43;</span>
           <span class="terminal-title">SADAME@WIRED:~</span>
@@ -155,6 +156,7 @@
       <!-- Taskbar -->
       <div id="taskbar">
         <div id="taskbar-buttons">
+          <button class="tb-btn" id="tb-terminal"    onclick="taskbarToggleTerminal()">&#62;_ terminal</button>
           <button class="tb-btn" id="tb-connections" onclick="toggleConnectionsSidebar()">⠿ connections</button>
           <button class="tb-btn" id="tb-music"       onclick="toggleMusicPanel()">♪ music</button>
           <button class="tb-btn" id="tb-tv"          onclick="taskbarToggleTv()">⊞ tv</button>

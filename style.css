@@ -195,7 +195,7 @@ html, body {
   min-height: 42px;
   max-width: calc(100% - 16px);
   max-height: calc(100% - 40px - 16px);
-  display: flex;
+  display: none;
   flex-direction: column;
   background: var(--terminal-bg);
   border: 1px solid #00ffcc44;
@@ -208,6 +208,10 @@ html, body {
   top: 60px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.terminal-window.visible {
+  display: flex;
 }
 
 /* Title bar */

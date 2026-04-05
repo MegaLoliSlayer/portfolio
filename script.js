@@ -40,6 +40,7 @@ function getRightPanel() {
 
 function updateTaskbar() {
   const states = {
+    'tb-terminal':    document.querySelector('.terminal-window').classList.contains('visible'),
     'tb-connections': document.getElementById('connections-sidebar').classList.contains('visible'),
     'tb-music':       document.getElementById('music-panel').classList.contains('visible'),
     'tb-tv':          document.getElementById('tv-panel').classList.contains('visible'),
@@ -48,6 +49,25 @@ function updateTaskbar() {
   Object.entries(states).forEach(([id, active]) => {
     document.getElementById(id).classList.toggle('active', active);
   });
+}
+
+function closeTerminal() {
+  document.querySelector('.terminal-window').classList.remove('visible');
+  updateTaskbar();
+}
+
+function taskbarToggleTerminal() {
+  const win = document.querySelector('.terminal-window');
+  if (win.classList.contains('visible')) {
+    win.classList.remove('visible');
+  } else {
+    win.style.cssText = '';
+    win.classList.add('visible');
+    const out = getOutput();
+    out.textContent = '';
+    printHelp();
+  }
+  updateTaskbar();
 }
 
 // ─── Background GIFs ─────────────────────────────────────────
@@ -657,6 +677,7 @@ async function runTerminalSequence() {
   const out     = getOutput();
 
   screen2.classList.add('active');
+  document.querySelector('.terminal-window').classList.add('visible');
   await wait(200);
 
   // Auto-run help on load so user knows the commands
