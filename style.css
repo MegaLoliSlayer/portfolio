@@ -285,6 +285,8 @@ html, body {
   padding: 10px 14px;
   background: rgba(0, 255, 204, 0.06);
   border-bottom: 1px solid #00ffcc33;
+  cursor: pointer;
+  user-select: none;
 }
 
 .music-title-wrap {

@@ -41,7 +41,7 @@
     </div>
     <!-- Music Panel -->
     <div id="music-panel">
-      <div class="music-titlebar">
+      <div class="music-titlebar" onclick="toggleMusicMinimize()" title="Click to minimize/expand">
         <span class="dot dot-red"></span>
         <span class="dot dot-yellow"></span>
         <span class="dot dot-green"></span>
@@ -69,7 +69,6 @@
         </div>
         <div id="embed-iframe"></div>
         <div class="music-buttons">
-          <button type="button" class="music-btn" aria-label="Minimize music panel" onclick="toggleMusicMinimize()">[minimize]</button>
           <button type="button" class="music-btn" aria-label="Toggle playlist view" onclick="toggleMusicPlaylist()">[playlist]</button>
         </div>
       </div>
