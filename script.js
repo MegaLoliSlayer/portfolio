@@ -148,6 +148,75 @@ function toggleConnectionsSidebar() {
   updateTaskbar();
 }
 
+// ─── Background Picker ────────────────────────────────────────
+let activeBg = 'background/lain3.gif';
+
+function initBgPicker() {
+  const picker   = document.getElementById('bg-picker');
+  const grid     = document.getElementById('picker-grid');
+  const titlebar = picker.querySelector('.picker-titlebar');
+
+  // Populate grid
+  BACKGROUND_FILES.forEach(path => {
+    const name = path.replace('background/', '');
+    const cell = document.createElement('div');
+    cell.className   = 'picker-cell';
+    cell.textContent = name;
+    if (path === activeBg) cell.classList.add('active');
+    cell.addEventListener('click', () => {
+      activeBg = path;
+      document.getElementById('right-bg').src = path;
+      grid.querySelectorAll('.picker-cell').forEach(c => c.classList.remove('active'));
+      cell.classList.add('active');
+    });
+    grid.appendChild(cell);
+  });
+
+  // Focus management
+  picker.addEventListener('mousedown', () => bringToFront(picker));
+
+  // Drag
+  let dragging = false, ox = 0, oy = 0;
+
+  titlebar.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('picker-close')) return;
+    dragging = true;
+    const rect   = picker.getBoundingClientRect();
+    const rpRect = getRightPanel().getBoundingClientRect();
+    picker.style.transform = 'none';
+    picker.style.top  = (rect.top  - rpRect.top)  + 'px';
+    picker.style.left = (rect.left - rpRect.left) + 'px';
+    ox = e.clientX - rect.left;
+    oy = e.clientY - rect.top;
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const rp = getRightPanel();
+    const rpRect = rp.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - ox - rpRect.left, rp.offsetWidth  - picker.offsetWidth));
+    const y = Math.max(0, Math.min(e.clientY - oy - rpRect.top,  rp.offsetHeight - picker.offsetHeight - 40));
+    picker.style.left = x + 'px';
+    picker.style.top  = y + 'px';
+  });
+
+  document.addEventListener('mouseup', () => { dragging = false; });
+}
+
+function toggleBgPicker() {
+  const picker = document.getElementById('bg-picker');
+  picker.classList.toggle('visible');
+  if (picker.classList.contains('visible')) {
+    bringToFront(picker);
+    // Re-center if not yet dragged
+    if (!picker.style.left) {
+      picker.style.transform = 'translate(-50%, -50%)';
+    }
+  }
+  updateTaskbar();
+}
+
 // ─── TV Panel ────────────────────────────────────────────────
 let tvIndex = 0;
 let tvTimer = null;
@@ -536,7 +605,12 @@ async function handleCommand(raw) {
       f => f.replace('background/', '').toLowerCase() === name.toLowerCase()
     );
     if (match) {
+      activeBg = match;
       document.getElementById('right-bg').src = match;
+      // Sync picker highlight
+      document.querySelectorAll('.picker-cell').forEach(c => {
+        c.classList.toggle('active', c.textContent === name);
+      });
       out.insertAdjacentText('beforeend', `> background set to ${name}\n`);
     } else {
       out.insertAdjacentText('beforeend', `background: ${name}: not found\n`);
@@ -636,6 +710,7 @@ runBootSequence().catch(console.error);
 initMusicDrag();
 initLainSide();
 initConnectionsSidebar();
+initBgPicker();
 initTvPanel();
 initTerminalDrag();
 
