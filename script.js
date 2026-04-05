@@ -122,6 +122,32 @@ function initLainSide() {
   });
 }
 
+// ─── Connections Sidebar ──────────────────────────────────────
+function initConnectionsSidebar() {
+  const sidebar = document.getElementById('connections-sidebar');
+  const body    = document.getElementById('conn-body');
+
+  // Populate links
+  LINKS.forEach(link => {
+    const a = document.createElement('a');
+    a.className   = 'conn-link';
+    a.href        = link.url;
+    a.target      = '_blank';
+    a.rel         = 'noopener noreferrer';
+    a.textContent = link.label;
+    body.appendChild(a);
+  });
+
+  // Focus management
+  sidebar.addEventListener('mousedown', () => bringToFront(sidebar));
+}
+
+function toggleConnectionsSidebar() {
+  const sidebar = document.getElementById('connections-sidebar');
+  sidebar.classList.toggle('visible');
+  updateTaskbar();
+}
+
 // ─── TV Panel ────────────────────────────────────────────────
 let tvIndex = 0;
 let tvTimer = null;
@@ -609,6 +635,7 @@ async function runTerminalSequence() {
 runBootSequence().catch(console.error);
 initMusicDrag();
 initLainSide();
+initConnectionsSidebar();
 initTvPanel();
 initTerminalDrag();
 
