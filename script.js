@@ -608,8 +608,9 @@ async function handleCommand(raw) {
       activeBg = match;
       document.getElementById('right-bg').src = match;
       // Sync picker highlight
+      const matchedName = match.replace('background/', '');
       document.querySelectorAll('.picker-cell').forEach(c => {
-        c.classList.toggle('active', c.textContent === name);
+        c.classList.toggle('active', c.textContent === matchedName);
       });
       out.insertAdjacentText('beforeend', `> background set to ${name}\n`);
     } else {
