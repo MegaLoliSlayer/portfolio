@@ -687,9 +687,15 @@ async function runTerminalSequence() {
   showPrompt();
 
   const input = document.getElementById('terminal-input');
-  // Re-focus input when clicking anywhere on the terminal
-  document.getElementById('screen2').addEventListener('click', () => {
-    input.focus();
+  // Re-focus input when clicking the right panel background (not on panels/windows/taskbar)
+  document.getElementById('right-panel').addEventListener('click', (e) => {
+    if (!e.target.closest('#connections-sidebar') &&
+        !e.target.closest('#bg-picker') &&
+        !e.target.closest('#music-panel') &&
+        !e.target.closest('#tv-panel') &&
+        !e.target.closest('#taskbar')) {
+      input.focus();
+    }
   });
 
   let processing = false;
@@ -710,10 +716,10 @@ async function runTerminalSequence() {
 runBootSequence().catch(console.error);
 initMusicDrag();
 initLainSide();
-initConnectionsSidebar();
-initBgPicker();
 initTvPanel();
 initTerminalDrag();
+initConnectionsSidebar();
+initBgPicker();
 
 // ─── Viewport Resize: clamp dragged panels within bounds ──────
 window.addEventListener('resize', () => {
