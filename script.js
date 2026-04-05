@@ -215,7 +215,17 @@ async function handleCommand(raw) {
 
   const lower = cmd.toLowerCase();
 
-  if (lower === 'help') {
+  if (lower === 'clear') {
+    getOutput().textContent = '';
+    return;
+
+  } else if (lower === 'music') {
+    const panel = document.getElementById('music-panel');
+    const isVisible = panel.classList.contains('visible');
+    toggleMusicPanel();
+    out.insertAdjacentText('beforeend', isVisible ? '> music player offline\n' : '> music player online\n');
+
+  } else if (lower === 'help') {
     await printHelp();
 
   } else if (lower === 'ls ./connections') {
