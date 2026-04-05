@@ -20,51 +20,206 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// ─── Lain GIF Sprites ────────────────────────────────────────
-const GIF_FILES = [
-  'lain1.webp',  'lain2.gif',  'lain3.gif',  'lain4.gif',
-  'lain6.gif',   'lain7.gif',  'lain8.gif',  'lain9.gif',
-  'lain10.gif',  'lain11.gif', 'lain12.gif', 'lain13.gif',
-  'lain14.gif',  'lain15.gif', 'lain16.gif', 'lain17.gif',
-  'lain18.gif',  'lain19.gif', 'lain20.gif', 'lain21.gif',
-  'lain22.gif',  'lain23.gif', 'lain24.gif', 'lain25.gif',
-  'lain26.gif',  'lain27.gif', 'lain28.gif', 'lain29.gif',
-  'lain30.gif',  'lain31.gif',
+// ─── Background GIFs ─────────────────────────────────────────
+const BACKGROUND_FILES = [
+  'lain1.webp', 'lain10.gif', 'lain11.gif', 'lain13.gif',
+  'lain16.gif', 'lain17.gif', 'lain20.gif', 'lain25.gif',
+  'lain29.gif', 'lain3.gif',  'lain4.gif',  'lain6.gif',
+  'lain7.gif',
+].map(f => 'background/' + f);
+
+// ─── TV Channel GIFs ─────────────────────────────────────────
+const TV_FILES = [
+  'lain1.webp', 'lain10.gif', 'lain11.gif', 'lain12.gif',
+  'lain13.gif', 'lain14.gif', 'lain15.gif', 'lain16.gif',
+  'lain17.gif', 'lain18.gif', 'lain19.gif', 'lain2.gif',
+  'lain20.gif', 'lain21.gif', 'lain22.gif', 'lain23.gif',
+  'lain24.gif', 'lain25.gif', 'lain26.gif', 'lain27.gif',
+  'lain29.gif', 'lain3.gif',  'lain30.gif', 'lain31.gif',
+  'lain4.gif',  'lain6.gif',  'lain7.gif',  'lain9.gif',
+].map(f => 'TV/' + f);
+
+// ─── Lain Dialog Lines ────────────────────────────────────────
+const LAIN_DIALOGS = [
+  'You found me again.',
+  'The wired runs deeper\nthan you know.',
+  'Are you really here\nright now?',
+  'God lives in the wired.',
+  'Where does your body end\nand the data begin?',
+  "You've been watching me\nfor a while now.",
+  'Do you exist if no one\nconnects to you?',
+  'Memory is just data.\nData is just memory.',
+  'Present day.\nPresent time.',
+  'Everyone is already\nconnected.',
+  'The flesh is just\nan interface.',
+  'Close the world.\nOpen the next.',
+  'I am everywhere.',
+  "You can hear me,\ncan't you?",
 ];
 
-// 6-column × 5-row full-background grid [left vw, top vh]
-// Spacing: ~16.5vw × 22vh — at 200-320px GIFs: slight corner overlap only
-const GIF_GRID = [
-  [ 0.5,  0], [17,  0], [33.5,  0], [50,  0], [66.5,  0], [83,  0],
-  [ 0.5, 22], [17, 22], [33.5, 22], [50, 22], [66.5, 22], [83, 22],
-  [ 0.5, 44], [17, 44], [33.5, 44], [50, 44], [66.5, 44], [83, 44],
-  [ 0.5, 66], [17, 66], [33.5, 66], [50, 66], [66.5, 66], [83, 66],
-  [ 0.5, 88], [17, 88], [33.5, 88], [50, 88], [66.5, 88], [83, 88],
-];
 
-function createGif(file, left, top, size, delay) {
-  const screen2 = document.getElementById('screen2');
-  const img = document.createElement('img');
-  img.src       = file;
-  img.className = 'lain-gif';
-  img.style.width = size + 'px';
-  img.style.left  = left + 'vw';
-  img.style.top   = top  + 'vh';
-  screen2.appendChild(img);
-  setTimeout(() => img.classList.add('visible'), delay);
+// ─── Lain Side Interactivity ──────────────────────────────────
+function initLainSide() {
+  const lain8      = document.getElementById('lain8');
+  const bubble     = document.getElementById('lain-bubble');
+  const bubbleText = document.getElementById('lain-bubble-text');
+
+  let closeTimer = null;
+  let lastIndex  = -1;
+
+  function showDialog() {
+    let idx;
+    do { idx = Math.floor(Math.random() * LAIN_DIALOGS.length); }
+    while (idx === lastIndex && LAIN_DIALOGS.length > 1);
+    lastIndex = idx;
+
+    if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+
+    bubbleText.textContent = LAIN_DIALOGS[idx];
+    bubble.classList.add('visible');
+
+    closeTimer = setTimeout(() => {
+      bubble.classList.remove('visible');
+      closeTimer = null;
+    }, 5000);
+  }
+
+  lain8.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showDialog();
+  });
 }
 
-function spawnGifs() {
-  const minSize = 200;
-  const maxSize = 320; // max < 2× min
+// ─── TV Panel ────────────────────────────────────────────────
+let tvIndex = 0;
+let tvTimer = null;
 
-  const shuffled = [...GIF_FILES].sort(() => Math.random() - 0.5);
-  shuffled.forEach((file, i) => {
-    const [baseL, baseT] = GIF_GRID[i % GIF_GRID.length];
-    const left = baseL + (Math.random() * 4 - 2); // ±2vw jitter
-    const top  = baseT + (Math.random() * 4 - 2); // ±2vh jitter
-    const size = minSize + Math.floor(Math.random() * (maxSize - minSize + 1));
-    createGif(file, left, top, size, i * 80);
+function updateTvChannel() {
+  document.getElementById('tv-channel').textContent =
+    'CH ' + String(tvIndex + 1).padStart(2, '0');
+}
+
+function setTvFrame(idx) {
+  tvIndex = (idx + TV_FILES.length) % TV_FILES.length;
+  document.getElementById('tv-img').src = TV_FILES[tvIndex];
+  updateTvChannel();
+}
+
+function tvNext() { setTvFrame(tvIndex + 1); resetTvTimer(); }
+function tvPrev() { setTvFrame(tvIndex - 1); resetTvTimer(); }
+
+function resetTvTimer() {
+  if (tvTimer) clearInterval(tvTimer);
+  tvTimer = setInterval(() => setTvFrame(tvIndex + 1), 4000);
+}
+
+function closeTvPanel() {
+  document.getElementById('tv-panel').classList.remove('visible');
+}
+
+function toggleTvMinimize() {
+  const panel = document.getElementById('tv-panel');
+  if (panel.classList.contains('minimized')) return;
+  panel.dataset.savedWidth  = panel.offsetWidth  + 'px';
+  panel.dataset.savedHeight = panel.offsetHeight + 'px';
+  panel.style.width  = panel.offsetWidth + 'px';
+  panel.style.height = panel.querySelector('.tv-titlebar').offsetHeight + 'px';
+  panel.classList.add('minimized');
+}
+
+function expandTvPanel() {
+  const panel = document.getElementById('tv-panel');
+  panel.classList.remove('minimized');
+  panel.style.width  = panel.dataset.savedWidth  || '';
+  panel.style.height = panel.dataset.savedHeight || '';
+}
+
+function initTvPanel() {
+  setTvFrame(0);
+  resetTvTimer();
+
+  const panel    = document.getElementById('tv-panel');
+  const titlebar = panel.querySelector('.tv-titlebar');
+  let dragging = false, ox = 0, oy = 0;
+
+  titlebar.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('tv-dot')) return;
+    dragging = true;
+    const rect = panel.getBoundingClientRect();
+    panel.style.right = 'auto';
+    panel.style.top   = rect.top  + 'px';
+    panel.style.left  = rect.left + 'px';
+    ox = e.clientX - rect.left;
+    oy = e.clientY - rect.top;
+    panel.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const x = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - panel.offsetWidth));
+    const y = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - panel.offsetHeight));
+    panel.style.left = x + 'px';
+    panel.style.top  = y + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    panel.classList.remove('dragging');
+  });
+}
+
+// ─── Terminal Window Controls ─────────────────────────────────
+function minimizeTerminal() {
+  const win = document.querySelector('.terminal-window');
+  if (win.classList.contains('minimized')) return;
+  win.dataset.savedWidth  = win.offsetWidth  + 'px';
+  win.dataset.savedHeight = win.offsetHeight + 'px';
+  win.style.width  = win.offsetWidth + 'px';
+  win.style.height = win.querySelector('.terminal-titlebar').offsetHeight + 'px';
+  win.classList.add('minimized');
+}
+
+function restoreTerminal() {
+  const win = document.querySelector('.terminal-window');
+  win.classList.remove('minimized');
+  win.style.width  = win.dataset.savedWidth  || '';
+  win.style.height = win.dataset.savedHeight || '';
+}
+
+function initTerminalDrag() {
+  const win      = document.querySelector('.terminal-window');
+  const titlebar = win.querySelector('.terminal-titlebar');
+  let dragging = false, ox = 0, oy = 0;
+
+  titlebar.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('terminal-dot')) return;
+    dragging = true;
+    const rect = win.getBoundingClientRect();
+    // Switch from flex flow to absolute so it can be freely moved
+    win.style.position = 'absolute';
+    win.style.left     = rect.left + 'px';
+    win.style.top      = rect.top  + 'px';
+    ox = e.clientX - rect.left;
+    oy = e.clientY - rect.top;
+    win.classList.add('dragging');
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const x = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - win.offsetWidth));
+    const y = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - win.offsetHeight));
+    win.style.left = x + 'px';
+    win.style.top  = y + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    win.classList.remove('dragging');
   });
 }
 
@@ -116,6 +271,9 @@ async function printHelp() {
     '  Hello Lain        ???',
     '  clear             clear terminal',
     '  music             toggle music player',
+    '  tv                toggle WIRED TV',
+    '  background        list background GIFs',
+    '  background [name] set right background',
     '──────────────────────────────────────────────',
   ];
   for (const line of lines) {
@@ -164,11 +322,19 @@ function hidePrompt() {
 // ─── Music Panel ──────────────────────────────────────────────
 
 function toggleMusicPanel() {
-  document.getElementById('music-panel').classList.toggle('visible');
+  const panel = document.getElementById('music-panel');
+  if (panel.classList.contains('visible')) {
+    panel.classList.remove('visible');
+  } else {
+    panel.style.cssText = '';
+    delete panel.dataset.savedWidth;
+    delete panel.dataset.savedHeight;
+    panel.classList.add('visible');
+  }
 }
 
 function toggleMusicMinimize() {
-  document.getElementById('music-panel').classList.toggle('minimized');
+  document.getElementById('music-panel').classList.add('minimized');
 }
 
 function toggleMusicPlaylist() {
@@ -263,6 +429,38 @@ async function handleCommand(raw) {
   } else if (lower === 'hello lain') {
     await printLainArt();
 
+  } else if (lower === 'tv') {
+    const panel = document.getElementById('tv-panel');
+    const wasVisible = panel.classList.contains('visible');
+    if (wasVisible) {
+      panel.classList.remove('visible');
+    } else {
+      panel.style.cssText = '';
+      delete panel.dataset.savedWidth;
+      delete panel.dataset.savedHeight;
+      panel.classList.add('visible');
+    }
+    out.insertAdjacentText('beforeend', !wasVisible ? '> WIRED TV online\n' : '> WIRED TV offline\n');
+
+  } else if (lower === 'background') {
+    out.insertAdjacentText('beforeend', 'available backgrounds:\n');
+    BACKGROUND_FILES.forEach(f => {
+      out.insertAdjacentText('beforeend', '  ' + f.replace('background/', '') + '\n');
+    });
+
+  } else if (lower.startsWith('background ')) {
+    const name = cmd.slice(11).trim();
+    const match = BACKGROUND_FILES.find(
+      f => f.replace('background/', '').toLowerCase() === name.toLowerCase()
+    );
+    if (match) {
+      document.getElementById('right-bg').src = match;
+      out.insertAdjacentText('beforeend', `> background set to ${name}\n`);
+    } else {
+      out.insertAdjacentText('beforeend', `background: ${name}: not found\n`);
+      out.insertAdjacentText('beforeend', `type 'background' to list available\n`);
+    }
+
   } else {
     out.insertAdjacentText('beforeend', `${cmd}: command not found\n`);
     out.insertAdjacentText('beforeend', `type 'help' for available commands\n`);
@@ -312,15 +510,19 @@ async function runTerminalSequence() {
   await printHelp();
   out.insertAdjacentText('beforeend', '\n');
 
-  // Spawn GIFs across the background
-  spawnGifs();
-
   // Show music panel with first-show zoom animation
   await wait(400);
   const musicPanel = document.getElementById('music-panel');
   musicPanel.classList.add('music-first-show');
   toggleMusicPanel();
   setTimeout(() => musicPanel.classList.remove('music-first-show'), 700);
+
+  // Show TV panel with zoom from top-right
+  await wait(150);
+  const tvPanel = document.getElementById('tv-panel');
+  tvPanel.classList.add('tv-first-show');
+  tvPanel.classList.add('visible');
+  setTimeout(() => tvPanel.classList.remove('tv-first-show'), 700);
 
   // Show interactive prompt and wire up Enter key
   showPrompt();
@@ -348,4 +550,23 @@ async function runTerminalSequence() {
 // ─── Start ────────────────────────────────────────────────────
 runBootSequence().catch(console.error);
 initMusicDrag();
+initLainSide();
+initTvPanel();
+initTerminalDrag();
+
+// ─── Viewport Resize: clamp dragged panels within bounds ──────
+window.addEventListener('resize', () => {
+  const panels = [
+    document.querySelector('.terminal-window'),
+    document.getElementById('music-panel'),
+    document.getElementById('tv-panel'),
+  ];
+  panels.forEach(el => {
+    if (!el || !el.style.left) return; // skip panels still in CSS flow
+    const maxX = Math.max(0, window.innerWidth  - el.offsetWidth);
+    const maxY = Math.max(0, window.innerHeight - el.offsetHeight);
+    if (parseFloat(el.style.left) > maxX) el.style.left = maxX + 'px';
+    if (parseFloat(el.style.top)  > maxY) el.style.top  = maxY + 'px';
+  });
+});
 
