@@ -204,6 +204,14 @@ function toggleMusicPlaylist() {
 }
 
 // ─── Command Handler ──────────────────────────────────────────
+function requireController(out) {
+  if (!window.spotifyController) {
+    out.insertAdjacentText('beforeend', "> no signal — run 'music' first\n");
+    return false;
+  }
+  return true;
+}
+
 async function handleCommand(raw) {
   const out = getOutput();
   const cmd = raw.trim();
@@ -224,6 +232,34 @@ async function handleCommand(raw) {
     const isVisible = panel.classList.contains('visible');
     toggleMusicPanel();
     out.insertAdjacentText('beforeend', isVisible ? '> music player offline\n' : '> music player online\n');
+
+  } else if (lower === 'play') {
+    if (!requireController(out)) { /* handled */ }
+    else {
+      window.spotifyController.resume();
+      out.insertAdjacentText('beforeend', '> resuming playback\n');
+    }
+
+  } else if (lower === 'pause') {
+    if (!requireController(out)) { /* handled */ }
+    else {
+      window.spotifyController.pause();
+      out.insertAdjacentText('beforeend', '> paused\n');
+    }
+
+  } else if (lower === 'skip') {
+    if (!requireController(out)) { /* handled */ }
+    else {
+      window.spotifyController.nextTrack();
+      out.insertAdjacentText('beforeend', '> skipping track\n');
+    }
+
+  } else if (lower === 'prev') {
+    if (!requireController(out)) { /* handled */ }
+    else {
+      window.spotifyController.previousTrack();
+      out.insertAdjacentText('beforeend', '> previous track\n');
+    }
 
   } else if (lower === 'help') {
     await printHelp();
