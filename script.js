@@ -108,13 +108,20 @@ function scrollTerminal() {
 async function printHelp() {
   const out = getOutput();
   const lines = [
-    '──────────────────────────────────────',
+    '──────────────────────────────────────────────',
     '  help              show this message',
     '  ls ./connections  list profile links',
     '  vim [name]        open profile page',
     '                    e.g. vim GitHub',
     '  Hello Lain        ???',
-    '──────────────────────────────────────',
+    '  clear             clear terminal',
+    '  music             toggle music player',
+    '  play              resume playback',
+    '  pause             pause playback',
+    '  skip              next track',
+    '  prev              previous track',
+    '  volume [0-100]    set volume',
+    '──────────────────────────────────────────────',
   ];
   for (const line of lines) {
     out.insertAdjacentText('beforeend', line + '\n');
