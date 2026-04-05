@@ -57,7 +57,7 @@
             <span>-- no signal --</span>
           </div>
           <div id="music-np-info" class="music-np-info">
-            <img id="music-cover" class="music-cover" src="" alt="cover" />
+            <img id="music-cover" class="music-cover" src="" alt="" />
             <div class="music-np-text">
               <div id="music-track-name" class="music-track-name"></div>
               <div id="music-artist-name" class="music-artist-name"></div>
@@ -69,8 +69,8 @@
         </div>
         <div id="embed-iframe"></div>
         <div class="music-buttons">
-          <button class="music-btn" onclick="toggleMusicMinimize()">[minimize]</button>
-          <button class="music-btn" onclick="toggleMusicPlaylist()">[playlist]</button>
+          <button type="button" class="music-btn" aria-label="Minimize music panel" onclick="toggleMusicMinimize()">[minimize]</button>
+          <button type="button" class="music-btn" aria-label="Toggle playlist view" onclick="toggleMusicPlaylist()">[playlist]</button>
         </div>
       </div>
     </div>
