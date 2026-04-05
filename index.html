@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
 </head>
 <body>
 
@@ -35,6 +36,41 @@
         <div id="input-line" class="terminal-input-line">
           <span class="prompt">SADAME@WIRED:~$ </span>
           <input type="text" id="terminal-input" spellcheck="false" autocomplete="off" />
+        </div>
+      </div>
+    </div>
+    <!-- Music Panel -->
+    <div id="music-panel">
+      <div class="music-titlebar">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+        <img id="music-cover-mini" class="music-cover-mini" src="" alt="" />
+        <div class="music-title-wrap">
+          <span id="music-title-mini" class="music-title-mini">SADAME@WIRED:~/music</span>
+        </div>
+      </div>
+      <div class="music-content">
+        <div class="music-nowplaying">
+          <div id="music-np-placeholder" class="music-np-placeholder">
+            <span class="music-placeholder-icon">&#9833;</span>
+            <span>-- no signal --</span>
+          </div>
+          <div id="music-np-info" class="music-np-info">
+            <img id="music-cover" class="music-cover" src="" alt="cover" />
+            <div class="music-np-text">
+              <div id="music-track-name" class="music-track-name"></div>
+              <div id="music-artist-name" class="music-artist-name"></div>
+              <div class="music-progress-bg">
+                <div id="music-progress-bar" class="music-progress-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="embed-iframe"></div>
+        <div class="music-buttons">
+          <button class="music-btn" onclick="toggleMusicMinimize()">[minimize]</button>
+          <button class="music-btn" onclick="toggleMusicPlaylist()">[playlist]</button>
         </div>
       </div>
     </div>
