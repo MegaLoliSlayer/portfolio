@@ -432,8 +432,8 @@ html, body {
   width: 260px;
   min-width: 160px;
   min-height: 42px;
-  max-width: calc(100vw - 48px);
-  max-height: calc(100vh - 48px);
+  max-width: calc(100% - 48px);
+  max-height: calc(100% - 40px - 48px);
   display: flex;
   flex-direction: column;
   background: #080810;
