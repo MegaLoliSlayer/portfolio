@@ -233,7 +233,6 @@ function initTerminalDrag() {
     oy = e.clientY - rect.top;
     win.classList.add('dragging');
     e.preventDefault();
-    e.stopPropagation();
   });
 
   document.addEventListener('mousemove', (e) => {
