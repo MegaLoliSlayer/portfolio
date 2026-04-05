@@ -118,9 +118,6 @@ async function printHelp() {
     '  music             toggle music player',
     '  play              resume playback',
     '  pause             pause playback',
-    '  skip              next track',
-    '  prev              previous track',
-    '  volume [0-100]    set volume',
     '──────────────────────────────────────────────',
   ];
   for (const line of lines) {
@@ -295,33 +292,6 @@ async function handleCommand(raw) {
     else {
       window.spotifyController.pause();
       out.insertAdjacentText('beforeend', '> paused\n');
-    }
-
-  } else if (lower === 'skip') {
-    if (!requireController(out)) { /* handled */ }
-    else {
-      window.spotifyController.nextTrack();
-      out.insertAdjacentText('beforeend', '> skipping track\n');
-    }
-
-  } else if (lower === 'prev') {
-    if (!requireController(out)) { /* handled */ }
-    else {
-      window.spotifyController.previousTrack();
-      out.insertAdjacentText('beforeend', '> previous track\n');
-    }
-
-  } else if (lower.startsWith('volume')) {
-    if (!requireController(out)) { /* handled */ }
-    else {
-      const arg = cmd.slice(6).trim();
-      const val = parseInt(arg, 10);
-      if (!arg || isNaN(val) || val < 0 || val > 100) {
-        out.insertAdjacentText('beforeend', 'usage: volume [0-100]\n');
-      } else {
-        window.spotifyController.setVolume(val / 100);
-        out.insertAdjacentText('beforeend', `> volume set to ${val}%\n`);
-      }
     }
 
   } else if (lower === 'help') {
