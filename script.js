@@ -38,6 +38,18 @@ function getRightPanel() {
   return document.getElementById('right-panel');
 }
 
+function updateTaskbar() {
+  const states = {
+    'tb-connections': document.getElementById('connections-sidebar').classList.contains('visible'),
+    'tb-music':       document.getElementById('music-panel').classList.contains('visible'),
+    'tb-tv':          document.getElementById('tv-panel').classList.contains('visible'),
+    'tb-background':  document.getElementById('bg-picker').classList.contains('visible'),
+  };
+  Object.entries(states).forEach(([id, active]) => {
+    document.getElementById(id).classList.toggle('active', active);
+  });
+}
+
 // ─── Background GIFs ─────────────────────────────────────────
 const BACKGROUND_FILES = [
   'lain1.webp', 'lain10.gif', 'lain11.gif', 'lain13.gif',
@@ -135,6 +147,21 @@ function resetTvTimer() {
 
 function closeTvPanel() {
   document.getElementById('tv-panel').classList.remove('visible');
+  updateTaskbar();
+}
+
+function taskbarToggleTv() {
+  const panel = document.getElementById('tv-panel');
+  const wasVisible = panel.classList.contains('visible');
+  if (wasVisible) {
+    panel.classList.remove('visible');
+  } else {
+    panel.style.cssText = '';
+    delete panel.dataset.savedWidth;
+    delete panel.dataset.savedHeight;
+    panel.classList.add('visible');
+  }
+  updateTaskbar();
 }
 
 function toggleTvMinimize() {
@@ -356,10 +383,9 @@ function toggleMusicPanel() {
     panel.classList.remove('visible');
   } else {
     panel.style.cssText = '';
-    delete panel.dataset.savedWidth;
-    delete panel.dataset.savedHeight;
     panel.classList.add('visible');
   }
+  updateTaskbar();
 }
 
 function toggleMusicMinimize() {
@@ -469,6 +495,7 @@ async function handleCommand(raw) {
       delete panel.dataset.savedHeight;
       panel.classList.add('visible');
     }
+    updateTaskbar();
     out.insertAdjacentText('beforeend', !wasVisible ? '> WIRED TV online\n' : '> WIRED TV offline\n');
 
   } else if (lower === 'background') {
@@ -552,6 +579,8 @@ async function runTerminalSequence() {
   tvPanel.classList.add('tv-first-show');
   tvPanel.classList.add('visible');
   setTimeout(() => tvPanel.classList.remove('tv-first-show'), 700);
+
+  updateTaskbar();
 
   // Show interactive prompt and wire up Enter key
   showPrompt();
