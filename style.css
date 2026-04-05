@@ -252,3 +252,217 @@ html, body {
 .lain-gif.visible {
   animation: gif-zoomout 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
+
+/* ─── Music Panel ────────────────────────────── */
+#music-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10;
+  width: 300px;
+  background: var(--terminal-bg);
+  border: 1px solid #00ffcc44;
+  border-radius: 8px;
+  box-shadow: var(--glow), inset 0 0 60px rgba(0,255,204,0.04);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#music-panel.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.music-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(0, 255, 204, 0.06);
+  border-bottom: 1px solid #00ffcc33;
+}
+
+.music-title-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: 4px;
+}
+
+.music-title-mini {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--accent);
+  opacity: 0.8;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#music-panel.minimized .music-title-mini {
+  overflow: visible;
+  text-overflow: unset;
+  animation: music-marquee 10s linear infinite;
+}
+
+@keyframes music-marquee {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.music-cover-mini {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  object-fit: cover;
+  border: 1px solid #00ffcc44;
+  display: none;
+  flex-shrink: 0;
+}
+
+.music-cover-mini.loaded {
+  display: block;
+}
+
+/* Collapsed when .minimized on panel */
+#music-panel.minimized .music-content {
+  display: none;
+}
+
+.music-content {
+  padding: 10px 12px 12px;
+}
+
+/* Now-playing row */
+.music-nowplaying {
+  margin-bottom: 8px;
+}
+
+.music-np-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(0,255,204,0.04);
+  border: 1px solid #00ffcc22;
+  border-radius: 6px;
+  color: var(--accent);
+  opacity: 0.5;
+  font-size: 0.82rem;
+}
+
+.music-placeholder-icon {
+  font-size: 1.4rem;
+}
+
+.music-np-info {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: rgba(0,255,204,0.04);
+  border: 1px solid #00ffcc22;
+  border-radius: 6px;
+}
+
+.music-np-info.active {
+  display: flex;
+}
+
+.music-cover {
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #00ffcc44;
+  flex-shrink: 0;
+}
+
+.music-np-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.music-track-name {
+  color: var(--accent);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 6px var(--accent);
+}
+
+.music-artist-name {
+  color: var(--text);
+  opacity: 0.55;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.music-progress-bg {
+  margin-top: 6px;
+  height: 4px;
+  background: #00ffcc22;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.music-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.5s linear;
+}
+
+/* Spotify iframe container */
+#embed-iframe {
+  border-radius: 6px;
+  overflow: hidden;
+  height: 152px;
+  transition: height 0.3s ease;
+}
+
+#embed-iframe.playlist-expanded {
+  height: 380px;
+}
+
+#embed-iframe iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Button row */
+.music-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.music-btn {
+  background: transparent;
+  border: 1px solid #00ffcc44;
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s, text-shadow 0.2s;
+}
+
+.music-btn:hover {
+  border-color: var(--accent);
+  text-shadow: 0 0 8px var(--accent);
+}
