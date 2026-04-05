@@ -159,6 +159,49 @@ function hidePrompt() {
   document.getElementById('input-line').style.display = 'none';
 }
 
+// ─── Music Panel ──────────────────────────────────────────────
+function updateNowPlaying(data) {
+  if (!data || !data.track) return;
+
+  const track  = data.track;
+  const name   = track.name || '';
+  const artist = track.artists && track.artists[0] ? track.artists[0].name : '';
+  const imgUrl = track.album && track.album.images && track.album.images[0]
+    ? track.album.images[0].url : '';
+  const progress = data.duration > 0 ? (data.position / data.duration) * 100 : 0;
+
+  // Show track info, hide placeholder
+  document.getElementById('music-np-placeholder').style.display = 'none';
+  const info = document.getElementById('music-np-info');
+  info.classList.add('active');
+
+  document.getElementById('music-track-name').textContent  = name;
+  document.getElementById('music-artist-name').textContent = artist;
+  document.getElementById('music-progress-bar').style.width = progress + '%';
+
+  if (imgUrl) {
+    const cover = document.getElementById('music-cover');
+    cover.src = imgUrl;
+    cover.alt = name + ' — ' + artist;
+    const mini = document.getElementById('music-cover-mini');
+    mini.src = imgUrl;
+    mini.classList.add('loaded');
+    document.getElementById('music-title-mini').textContent = name + ' — ' + artist;
+  }
+}
+
+function toggleMusicPanel() {
+  document.getElementById('music-panel').classList.toggle('visible');
+}
+
+function toggleMusicMinimize() {
+  document.getElementById('music-panel').classList.toggle('minimized');
+}
+
+function toggleMusicPlaylist() {
+  document.getElementById('embed-iframe').classList.toggle('playlist-expanded');
+}
+
 // ─── Command Handler ──────────────────────────────────────────
 async function handleCommand(raw) {
   const out = getOutput();
@@ -271,3 +314,17 @@ async function runTerminalSequence() {
 
 // ─── Start ────────────────────────────────────────────────────
 runBootSequence().catch(console.error);
+
+// ─── Spotify iFrame API ───────────────────────────────────────
+window.onSpotifyIframeApiReady = (IFrameAPI) => {
+  IFrameAPI.createController(
+    document.getElementById('embed-iframe'),
+    { uri: 'spotify:playlist:5sWG2t5DumbG1jb8zD2HJ0' },
+    (controller) => {
+      window.spotifyController = controller;
+      controller.addListener('playback_update', (e) => {
+        updateNowPlaying(e.data);
+      });
+    }
+  );
+};
