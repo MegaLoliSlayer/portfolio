@@ -238,7 +238,7 @@ async function handleCommand(raw) {
     const panel = document.getElementById('music-panel');
     const isVisible = panel.classList.contains('visible');
     toggleMusicPanel();
-    out.insertAdjacentText('beforeend', isVisible ? '> music player offline\n' : '> music player online\n');
+    out.insertAdjacentText('beforeend', isVisible ? '> player hidden — music continues\n' : '> music player online\n');
 
   } else if (lower === 'help') {
     await printHelp();
@@ -315,9 +315,12 @@ async function runTerminalSequence() {
   // Spawn GIFs across the background
   spawnGifs();
 
-  // Show music panel
+  // Show music panel with first-show zoom animation
   await wait(400);
+  const musicPanel = document.getElementById('music-panel');
+  musicPanel.classList.add('music-first-show');
   toggleMusicPanel();
+  setTimeout(() => musicPanel.classList.remove('music-first-show'), 700);
 
   // Show interactive prompt and wire up Enter key
   showPrompt();
