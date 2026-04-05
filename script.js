@@ -210,6 +210,10 @@ function toggleMusicPlaylist() {
   document.getElementById('embed-iframe').classList.toggle('playlist-expanded');
 }
 
+function expandMusicPanel() {
+  document.getElementById('music-panel').classList.remove('minimized');
+}
+
 // ─── Command Handler ──────────────────────────────────────────
 function requireController(out) {
   if (!window.spotifyController) {

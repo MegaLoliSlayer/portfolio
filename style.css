@@ -285,8 +285,24 @@ html, body {
   padding: 10px 14px;
   background: rgba(0, 255, 204, 0.06);
   border-bottom: 1px solid #00ffcc33;
-  cursor: pointer;
   user-select: none;
+}
+
+.music-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  line-height: 1;
+  transition: filter 0.15s;
+}
+
+.music-dot:hover {
+  filter: brightness(0.75);
+  color: rgba(0, 0, 0, 0.85);
 }
 
 .music-title-wrap {

@@ -41,10 +41,10 @@
     </div>
     <!-- Music Panel -->
     <div id="music-panel">
-      <div class="music-titlebar" onclick="toggleMusicMinimize()" title="Click to minimize/expand">
-        <span class="dot dot-red"></span>
-        <span class="dot dot-yellow"></span>
-        <span class="dot dot-green"></span>
+      <div class="music-titlebar">
+        <span class="dot dot-red music-dot" onclick="toggleMusicPanel()" title="Close">&#10005;</span>
+        <span class="dot dot-yellow music-dot" onclick="toggleMusicMinimize()" title="Minimize">&#8722;</span>
+        <span class="dot dot-green music-dot" onclick="expandMusicPanel()" title="Maximize">&#43;</span>
         <img id="music-cover-mini" class="music-cover-mini" src="" alt="" />
         <div class="music-title-wrap">
           <span id="music-title-mini" class="music-title-mini">SADAME@WIRED:~/music</span>
