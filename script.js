@@ -185,6 +185,7 @@ function updateNowPlaying(data) {
     cover.alt = name + ' — ' + artist;
     const mini = document.getElementById('music-cover-mini');
     mini.src = imgUrl;
+    mini.alt = name + ' — ' + artist;
     mini.classList.add('loaded');
     document.getElementById('music-title-mini').textContent = name + ' — ' + artist;
   }
