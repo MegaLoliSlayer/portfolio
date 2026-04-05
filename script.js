@@ -261,6 +261,19 @@ async function handleCommand(raw) {
       out.insertAdjacentText('beforeend', '> previous track\n');
     }
 
+  } else if (lower.startsWith('volume')) {
+    if (!requireController(out)) { /* handled */ }
+    else {
+      const arg = cmd.slice(6).trim();
+      const val = parseInt(arg, 10);
+      if (!arg || isNaN(val) || val < 0 || val > 100) {
+        out.insertAdjacentText('beforeend', 'usage: volume [0-100]\n');
+      } else {
+        window.spotifyController.setVolume(val / 100);
+        out.insertAdjacentText('beforeend', `> volume set to ${val}%\n`);
+      }
+    }
+
   } else if (lower === 'help') {
     await printHelp();
 
