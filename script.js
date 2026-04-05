@@ -74,7 +74,7 @@ const LINKS = [
   { name: 'Steam',        label: '[02] Steam',         url: 'https://steamcommunity.com/id/MegaLoliSlayer/' },
   { name: 'NetEase',      label: '[03] NetEase Music', url: 'https://music.163.com/playlist?id=2970962753&uct2=U2FsdGVkX18R6AjtMreh49ZCQBC5vxa9J6phSrEPocg=' },
   { name: 'MyAnimeList',  label: '[04] MyAnimeList',   url: 'https://myanimelist.net/profile/MegaLoliSlayer' },
-  { name: 'Spotify',      label: '[05] Spotify',       url: 'https://open.spotify.com/playlist/5sWG2t5DumbG1jb8zD2HJ0?si=e986dda700e1443e&nd=1&dlsi=8ebdc819db284c27' },
+  { name: 'Spotify',      label: '[05] Spotify',       url: 'https://open.spotify.com/playlist/4MWZmsObrlhg0dBGmSu1b6' },
   { name: 'PlayStation',  label: '[06] PlayStation',   url: 'https://profile.playstation.com/MEGA_Dropkick2' },
 ];
 
@@ -386,7 +386,7 @@ runBootSequence().catch(console.error);
 window.onSpotifyIframeApiReady = (IFrameAPI) => {
   IFrameAPI.createController(
     document.getElementById('embed-iframe'),
-    { uri: 'spotify:playlist:5sWG2t5DumbG1jb8zD2HJ0' },
+    { uri: 'spotify:playlist:4MWZmsObrlhg0dBGmSu1b6' },
     (controller) => {
       window.spotifyController = controller;
       controller.addListener('playback_update', (e) => {
