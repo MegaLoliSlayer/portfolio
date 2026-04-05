@@ -20,6 +20,20 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ─── Right Panel Layout ───────────────────────────────────────
+function updateLainWidth() {
+  const lain8 = document.getElementById('lain8');
+  if (lain8 && lain8.offsetWidth) {
+    document.documentElement.style.setProperty('--lain-w', lain8.offsetWidth + 'px');
+  }
+}
+
+// ─── Window Focus Management ──────────────────────────────────
+let topZ = 20;
+function bringToFront(el) {
+  el.style.zIndex = ++topZ;
+}
+
 // ─── Background GIFs ─────────────────────────────────────────
 const BACKGROUND_FILES = [
   'lain1.webp', 'lain10.gif', 'lain11.gif', 'lain13.gif',
@@ -61,6 +75,8 @@ const LAIN_DIALOGS = [
 // ─── Lain Side Interactivity ──────────────────────────────────
 function initLainSide() {
   const lain8      = document.getElementById('lain8');
+  lain8.addEventListener('load', updateLainWidth);
+  updateLainWidth(); // in case already loaded (cached)
   const bubble     = document.getElementById('lain-bubble');
   const bubbleText = document.getElementById('lain-bubble-text');
 
@@ -139,6 +155,7 @@ function initTvPanel() {
   resetTvTimer();
 
   const panel    = document.getElementById('tv-panel');
+  panel.addEventListener('mousedown', () => bringToFront(panel));
   const titlebar = panel.querySelector('.tv-titlebar');
   let dragging = false, ox = 0, oy = 0;
 
@@ -190,6 +207,7 @@ function restoreTerminal() {
 
 function initTerminalDrag() {
   const win      = document.querySelector('.terminal-window');
+  win.addEventListener('mousedown', () => bringToFront(win));
   const titlebar = win.querySelector('.terminal-titlebar');
   let dragging = false, ox = 0, oy = 0;
 
@@ -347,6 +365,7 @@ function expandMusicPanel() {
 
 function initMusicDrag() {
   const panel    = document.getElementById('music-panel');
+  panel.addEventListener('mousedown', () => bringToFront(panel));
   const titlebar = panel.querySelector('.music-titlebar');
 
   let dragging = false;
@@ -556,15 +575,21 @@ initTerminalDrag();
 
 // ─── Viewport Resize: clamp dragged panels within bounds ──────
 window.addEventListener('resize', () => {
+  updateLainWidth();
+
+  const rp = document.getElementById('right-panel');
+  if (!rp) return;
+
   const panels = [
     document.querySelector('.terminal-window'),
     document.getElementById('music-panel'),
     document.getElementById('tv-panel'),
+    document.getElementById('bg-picker'),
   ];
   panels.forEach(el => {
-    if (!el || !el.style.left) return; // skip panels still in CSS flow
-    const maxX = Math.max(0, window.innerWidth  - el.offsetWidth);
-    const maxY = Math.max(0, window.innerHeight - el.offsetHeight);
+    if (!el || !el.style.left) return;
+    const maxX = Math.max(0, rp.offsetWidth  - el.offsetWidth);
+    const maxY = Math.max(0, rp.offsetHeight - el.offsetHeight - 40);
     if (parseFloat(el.style.left) > maxX) el.style.left = maxX + 'px';
     if (parseFloat(el.style.top)  > maxY) el.style.top  = maxY + 'px';
   });
