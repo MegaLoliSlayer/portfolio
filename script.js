@@ -116,8 +116,6 @@ async function printHelp() {
     '  Hello Lain        ???',
     '  clear             clear terminal',
     '  music             toggle music player',
-    '  play              resume playback',
-    '  pause             pause playback',
     '──────────────────────────────────────────────',
   ];
   for (const line of lines) {
@@ -164,36 +162,6 @@ function hidePrompt() {
 }
 
 // ─── Music Panel ──────────────────────────────────────────────
-function updateNowPlaying(data) {
-  if (!data || !data.track) return;
-
-  const track  = data.track;
-  const name   = track.name || '';
-  const artist = track.artists && track.artists[0] ? track.artists[0].name : '';
-  const imgUrl = track.album && track.album.images && track.album.images[0]
-    ? track.album.images[0].url : '';
-  const progress = data.duration > 0 ? (data.position / data.duration) * 100 : 0;
-
-  // Show track info, hide placeholder
-  document.getElementById('music-np-placeholder').style.display = 'none';
-  const info = document.getElementById('music-np-info');
-  info.classList.add('active');
-
-  document.getElementById('music-track-name').textContent  = name;
-  document.getElementById('music-artist-name').textContent = artist;
-  document.getElementById('music-progress-bar').style.width = progress + '%';
-
-  if (imgUrl) {
-    const cover = document.getElementById('music-cover');
-    cover.src = imgUrl;
-    cover.alt = name + ' — ' + artist;
-    const mini = document.getElementById('music-cover-mini');
-    mini.src = imgUrl;
-    mini.alt = name + ' — ' + artist;
-    mini.classList.add('loaded');
-    document.getElementById('music-title-mini').textContent = name + ' — ' + artist;
-  }
-}
 
 function toggleMusicPanel() {
   document.getElementById('music-panel').classList.toggle('visible');
@@ -251,14 +219,6 @@ function initMusicDrag() {
 }
 
 // ─── Command Handler ──────────────────────────────────────────
-function requireController(out) {
-  if (!window.spotifyController) {
-    out.insertAdjacentText('beforeend', "> no signal — run 'music' first\n");
-    return false;
-  }
-  return true;
-}
-
 async function handleCommand(raw) {
   const out = getOutput();
   const cmd = raw.trim();
@@ -279,20 +239,6 @@ async function handleCommand(raw) {
     const isVisible = panel.classList.contains('visible');
     toggleMusicPanel();
     out.insertAdjacentText('beforeend', isVisible ? '> music player offline\n' : '> music player online\n');
-
-  } else if (lower === 'play') {
-    if (!requireController(out)) { /* handled */ }
-    else {
-      window.spotifyController.resume();
-      out.insertAdjacentText('beforeend', '> resuming playback\n');
-    }
-
-  } else if (lower === 'pause') {
-    if (!requireController(out)) { /* handled */ }
-    else {
-      window.spotifyController.pause();
-      out.insertAdjacentText('beforeend', '> paused\n');
-    }
 
   } else if (lower === 'help') {
     await printHelp();
@@ -400,24 +346,3 @@ async function runTerminalSequence() {
 runBootSequence().catch(console.error);
 initMusicDrag();
 
-// ─── Spotify iFrame API ───────────────────────────────────────
-window.onSpotifyIframeApiReady = (IFrameAPI) => {
-  IFrameAPI.createController(
-    document.getElementById('embed-iframe'),
-    { uri: 'spotify:playlist:4MWZmsObrlhg0dBGmSu1b6' },
-    (controller) => {
-      window.spotifyController = controller;
-      controller.addListener('ready', () => {
-        controller.resume();
-      });
-      controller.addListener('playback_update', (e) => {
-        if (!e.data || !e.data.track) {
-          document.getElementById('music-np-placeholder').style.display = '';
-          document.getElementById('music-np-info').classList.remove('active');
-          return;
-        }
-        updateNowPlaying(e.data);
-      });
-    }
-  );
-};
