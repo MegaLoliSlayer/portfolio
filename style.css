@@ -1,3 +1,52 @@
+/* ─── Animated Cursor Keyframes ─────────────────── */
+@keyframes cursor-normal {
+  0%    { cursor: url("normal%20select/pixil-frame-0.png") 0 0, auto; }
+  12.5% { cursor: url("normal%20select/pixil-frame-1.png") 0 0, auto; }
+  25%   { cursor: url("normal%20select/pixil-frame-2.png") 0 0, auto; }
+  37.5% { cursor: url("normal%20select/pixil-frame-3.png") 0 0, auto; }
+  50%   { cursor: url("normal%20select/pixil-frame-4.png") 0 0, auto; }
+  62.5% { cursor: url("normal%20select/pixil-frame-5.png") 0 0, auto; }
+  75%   { cursor: url("normal%20select/pixil-frame-6.png") 0 0, auto; }
+  87.5% { cursor: url("normal%20select/pixil-frame-7.png") 0 0, auto; }
+  100%  { cursor: url("normal%20select/pixil-frame-0.png") 0 0, auto; }
+}
+
+@keyframes cursor-pointer {
+  0%    { cursor: url("link%20select/pixil-frame-0.png") 0 0, pointer; }
+  12.5% { cursor: url("link%20select/pixil-frame-1.png") 0 0, pointer; }
+  25%   { cursor: url("link%20select/pixil-frame-2.png") 0 0, pointer; }
+  37.5% { cursor: url("link%20select/pixil-frame-3.png") 0 0, pointer; }
+  50%   { cursor: url("link%20select/pixil-frame-4.png") 0 0, pointer; }
+  62.5% { cursor: url("link%20select/pixil-frame-5.png") 0 0, pointer; }
+  75%   { cursor: url("link%20select/pixil-frame-6.png") 0 0, pointer; }
+  87.5% { cursor: url("link%20select/pixil-frame-7.png") 0 0, pointer; }
+  100%  { cursor: url("link%20select/pixil-frame-0.png") 0 0, pointer; }
+}
+
+@keyframes cursor-drag {
+  0%    { cursor: url("drag%20select/pixil-frame-0.png") 0 0, grab; }
+  12.5% { cursor: url("drag%20select/pixil-frame-1.png") 0 0, grab; }
+  25%   { cursor: url("drag%20select/pixil-frame-2.png") 0 0, grab; }
+  37.5% { cursor: url("drag%20select/pixil-frame-3.png") 0 0, grab; }
+  50%   { cursor: url("drag%20select/pixil-frame-4.png") 0 0, grab; }
+  62.5% { cursor: url("drag%20select/pixil-frame-5.png") 0 0, grab; }
+  75%   { cursor: url("drag%20select/pixil-frame-6.png") 0 0, grab; }
+  87.5% { cursor: url("drag%20select/pixil-frame-7.png") 0 0, grab; }
+  100%  { cursor: url("drag%20select/pixil-frame-0.png") 0 0, grab; }
+}
+
+@keyframes cursor-type {
+  0%    { cursor: url("type%20select/pixil-frame-0.png") 0 0, text; }
+  12.5% { cursor: url("type%20select/pixil-frame-1.png") 0 0, text; }
+  25%   { cursor: url("type%20select/pixil-frame-2.png") 0 0, text; }
+  37.5% { cursor: url("type%20select/pixil-frame-3.png") 0 0, text; }
+  50%   { cursor: url("type%20select/pixil-frame-4.png") 0 0, text; }
+  62.5% { cursor: url("type%20select/pixil-frame-5.png") 0 0, text; }
+  75%   { cursor: url("type%20select/pixil-frame-6.png") 0 0, text; }
+  87.5% { cursor: url("type%20select/pixil-frame-7.png") 0 0, text; }
+  100%  { cursor: url("type%20select/pixil-frame-0.png") 0 0, text; }
+}
+
 /* ─── CSS Variables ─────────────────────────────── */
 :root {
   --bg:        #0a0a0f;
@@ -22,7 +71,7 @@ html, body {
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
   overflow: hidden;
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%2300ffcc' stroke-width='1' stroke-dasharray='5 3' opacity='0.85'/%3E%3Cline x1='16' y1='1' x2='16' y2='9' stroke='%2300ffcc' stroke-width='1.5'/%3E%3Cline x1='16' y1='23' x2='16' y2='31' stroke='%2300ffcc' stroke-width='1.5'/%3E%3Cline x1='1' y1='16' x2='9' y2='16' stroke='%2300ffcc' stroke-width='1.5'/%3E%3Cline x1='23' y1='16' x2='31' y2='16' stroke='%2300ffcc' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='1.5' fill='%2300ffcc'/%3E%3C/svg%3E") 16 16, crosshair;
+  animation: cursor-normal 800ms steps(1) infinite;
 }
 
 /* ─── Screens ────────────────────────────────────── */
@@ -202,6 +251,7 @@ html, body {
   font-size: inherit;
   caret-color: var(--accent);
   width: 100%;
+  animation: cursor-type 800ms steps(1) infinite;
 }
 
 #terminal-output {
@@ -215,7 +265,7 @@ html, body {
   text-decoration: none;
   text-shadow: 0 0 6px var(--accent);
   transition: text-shadow 0.2s, letter-spacing 0.2s;
-  cursor: pointer;
+  animation: cursor-pointer 800ms steps(1) infinite;
 }
 
 .term-link:hover {
@@ -293,7 +343,7 @@ html, body {
   background: rgba(0, 255, 204, 0.06);
   border-bottom: 1px solid #00ffcc33;
   user-select: none;
-  cursor: grab;
+  animation: cursor-drag 800ms steps(1) infinite;
 }
 
 #music-panel.dragging {
@@ -301,7 +351,7 @@ html, body {
 }
 
 #music-panel.dragging .music-titlebar {
-  cursor: grabbing;
+  animation: cursor-drag 800ms steps(1) infinite;
 }
 
 .music-dot {
@@ -311,7 +361,7 @@ html, body {
   font-size: 8px;
   font-weight: 700;
   color: rgba(0, 0, 0, 0.55);
-  cursor: pointer;
+  animation: cursor-pointer 800ms steps(1) infinite;
   line-height: 1;
   transition: filter 0.15s;
 }
@@ -382,7 +432,7 @@ html, body {
   font-size: 0.78rem;
   padding: 4px 12px;
   border-radius: 4px;
-  cursor: pointer;
+  animation: cursor-pointer 800ms steps(1) infinite;
   transition: border-color 0.2s, text-shadow 0.2s;
 }
 
