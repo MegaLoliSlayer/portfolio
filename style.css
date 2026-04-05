@@ -286,6 +286,11 @@ html, body {
   background: rgba(0, 255, 204, 0.06);
   border-bottom: 1px solid #00ffcc33;
   user-select: none;
+  cursor: grab;
+}
+
+#music-panel.dragging .music-titlebar {
+  cursor: grabbing;
 }
 
 .music-dot {

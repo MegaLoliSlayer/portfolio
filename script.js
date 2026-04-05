@@ -214,6 +214,45 @@ function expandMusicPanel() {
   document.getElementById('music-panel').classList.remove('minimized');
 }
 
+function initMusicDrag() {
+  const panel    = document.getElementById('music-panel');
+  const titlebar = panel.querySelector('.music-titlebar');
+
+  let dragging = false;
+  let ox = 0, oy = 0;
+
+  titlebar.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('music-dot')) return;
+    dragging = true;
+
+    // Convert bottom/right to top/left so we can move freely
+    const rect = panel.getBoundingClientRect();
+    panel.style.bottom = 'auto';
+    panel.style.right  = 'auto';
+    panel.style.left   = rect.left + 'px';
+    panel.style.top    = rect.top  + 'px';
+
+    ox = e.clientX - rect.left;
+    oy = e.clientY - rect.top;
+    panel.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const x = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - panel.offsetWidth));
+    const y = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - panel.offsetHeight));
+    panel.style.left = x + 'px';
+    panel.style.top  = y + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    panel.classList.remove('dragging');
+  });
+}
+
 // ─── Command Handler ──────────────────────────────────────────
 function requireController(out) {
   if (!window.spotifyController) {
@@ -385,6 +424,7 @@ async function runTerminalSequence() {
 
 // ─── Start ────────────────────────────────────────────────────
 runBootSequence().catch(console.error);
+initMusicDrag();
 
 // ─── Spotify iFrame API ───────────────────────────────────────
 window.onSpotifyIframeApiReady = (IFrameAPI) => {
