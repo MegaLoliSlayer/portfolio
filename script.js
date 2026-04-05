@@ -369,6 +369,10 @@ async function runTerminalSequence() {
   // Spawn GIFs across the background
   spawnGifs();
 
+  // Show music panel
+  await wait(400);
+  toggleMusicPanel();
+
   // Show interactive prompt and wire up Enter key
   showPrompt();
 
@@ -403,6 +407,9 @@ window.onSpotifyIframeApiReady = (IFrameAPI) => {
     { uri: 'spotify:playlist:4MWZmsObrlhg0dBGmSu1b6' },
     (controller) => {
       window.spotifyController = controller;
+      controller.addListener('ready', () => {
+        controller.resume();
+      });
       controller.addListener('playback_update', (e) => {
         if (!e.data || !e.data.track) {
           document.getElementById('music-np-placeholder').style.display = '';
