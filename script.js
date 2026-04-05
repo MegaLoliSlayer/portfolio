@@ -390,6 +390,11 @@ window.onSpotifyIframeApiReady = (IFrameAPI) => {
     (controller) => {
       window.spotifyController = controller;
       controller.addListener('playback_update', (e) => {
+        if (!e.data || !e.data.track) {
+          document.getElementById('music-np-placeholder').style.display = '';
+          document.getElementById('music-np-info').classList.remove('active');
+          return;
+        }
         updateNowPlaying(e.data);
       });
     }
