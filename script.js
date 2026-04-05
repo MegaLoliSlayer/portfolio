@@ -34,6 +34,10 @@ function bringToFront(el) {
   el.style.zIndex = ++topZ;
 }
 
+function getRightPanel() {
+  return document.getElementById('right-panel');
+}
+
 // ─── Background GIFs ─────────────────────────────────────────
 const BACKGROUND_FILES = [
   'lain1.webp', 'lain10.gif', 'lain11.gif', 'lain13.gif',
@@ -156,16 +160,18 @@ function initTvPanel() {
 
   const panel    = document.getElementById('tv-panel');
   panel.addEventListener('mousedown', () => bringToFront(panel));
+
   const titlebar = panel.querySelector('.tv-titlebar');
   let dragging = false, ox = 0, oy = 0;
 
   titlebar.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('tv-dot')) return;
     dragging = true;
-    const rect = panel.getBoundingClientRect();
+    const rect   = panel.getBoundingClientRect();
+    const rpRect = getRightPanel().getBoundingClientRect();
     panel.style.right = 'auto';
-    panel.style.top   = rect.top  + 'px';
-    panel.style.left  = rect.left + 'px';
+    panel.style.top   = (rect.top  - rpRect.top)  + 'px';
+    panel.style.left  = (rect.left - rpRect.left) + 'px';
     ox = e.clientX - rect.left;
     oy = e.clientY - rect.top;
     panel.classList.add('dragging');
@@ -174,8 +180,10 @@ function initTvPanel() {
 
   document.addEventListener('mousemove', (e) => {
     if (!dragging) return;
-    const x = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - panel.offsetWidth));
-    const y = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - panel.offsetHeight));
+    const rp = getRightPanel();
+    const rpRect = rp.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - ox - rpRect.left, rp.offsetWidth  - panel.offsetWidth));
+    const y = Math.max(0, Math.min(e.clientY - oy - rpRect.top,  rp.offsetHeight - panel.offsetHeight - 40));
     panel.style.left = x + 'px';
     panel.style.top  = y + 'px';
   });
@@ -207,18 +215,20 @@ function restoreTerminal() {
 
 function initTerminalDrag() {
   const win      = document.querySelector('.terminal-window');
-  win.addEventListener('mousedown', () => bringToFront(win));
   const titlebar = win.querySelector('.terminal-titlebar');
   let dragging = false, ox = 0, oy = 0;
+
+  win.addEventListener('mousedown', () => bringToFront(win));
 
   titlebar.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('terminal-dot')) return;
     dragging = true;
-    const rect = win.getBoundingClientRect();
-    // Switch from flex flow to absolute so it can be freely moved
-    win.style.position = 'absolute';
-    win.style.left     = rect.left + 'px';
-    win.style.top      = rect.top  + 'px';
+    const rect   = win.getBoundingClientRect();
+    const rpRect = getRightPanel().getBoundingClientRect();
+    win.style.position  = 'absolute';
+    win.style.transform = 'none';
+    win.style.left = (rect.left - rpRect.left) + 'px';
+    win.style.top  = (rect.top  - rpRect.top)  + 'px';
     ox = e.clientX - rect.left;
     oy = e.clientY - rect.top;
     win.classList.add('dragging');
@@ -228,8 +238,10 @@ function initTerminalDrag() {
 
   document.addEventListener('mousemove', (e) => {
     if (!dragging) return;
-    const x = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - win.offsetWidth));
-    const y = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - win.offsetHeight));
+    const rp = getRightPanel();
+    const rpRect = rp.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - ox - rpRect.left, rp.offsetWidth  - win.offsetWidth));
+    const y = Math.max(0, Math.min(e.clientY - oy - rpRect.top,  rp.offsetHeight - win.offsetHeight - 40));
     win.style.left = x + 'px';
     win.style.top  = y + 'px';
   });
@@ -365,23 +377,20 @@ function expandMusicPanel() {
 
 function initMusicDrag() {
   const panel    = document.getElementById('music-panel');
-  panel.addEventListener('mousedown', () => bringToFront(panel));
   const titlebar = panel.querySelector('.music-titlebar');
+  let dragging = false, ox = 0, oy = 0;
 
-  let dragging = false;
-  let ox = 0, oy = 0;
+  panel.addEventListener('mousedown', () => bringToFront(panel));
 
   titlebar.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('music-dot')) return;
     dragging = true;
-
-    // Convert bottom/right to top/left so we can move freely
-    const rect = panel.getBoundingClientRect();
+    const rect   = panel.getBoundingClientRect();
+    const rpRect = getRightPanel().getBoundingClientRect();
     panel.style.bottom = 'auto';
     panel.style.right  = 'auto';
-    panel.style.left   = rect.left + 'px';
-    panel.style.top    = rect.top  + 'px';
-
+    panel.style.left   = (rect.left - rpRect.left) + 'px';
+    panel.style.top    = (rect.top  - rpRect.top)  + 'px';
     ox = e.clientX - rect.left;
     oy = e.clientY - rect.top;
     panel.classList.add('dragging');
@@ -390,8 +399,10 @@ function initMusicDrag() {
 
   document.addEventListener('mousemove', (e) => {
     if (!dragging) return;
-    const x = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - panel.offsetWidth));
-    const y = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - panel.offsetHeight));
+    const rp = getRightPanel();
+    const rpRect = rp.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - ox - rpRect.left, rp.offsetWidth  - panel.offsetWidth));
+    const y = Math.max(0, Math.min(e.clientY - oy - rpRect.top,  rp.offsetHeight - panel.offsetHeight - 40));
     panel.style.left = x + 'px';
     panel.style.top  = y + 'px';
   });
