@@ -793,8 +793,11 @@ let ssCanvas, ssCtx, ssColumns;
 
 function ssResize() {
   if (!ssCanvas) return;
-  ssCanvas.width  = window.innerWidth;
-  ssCanvas.height = window.innerHeight;
+  const downscale = isMobile ? 0.5 : 1;
+  ssCanvas.width  = Math.floor(window.innerWidth  * downscale);
+  ssCanvas.height = Math.floor(window.innerHeight * downscale);
+  ssCanvas.style.width  = window.innerWidth  + 'px';
+  ssCanvas.style.height = window.innerHeight + 'px';
   const colWidth = 16;
   const cols = Math.ceil(ssCanvas.width / colWidth);
   ssColumns = [];
@@ -837,7 +840,7 @@ function ssDraw() {
       col.speed = 6 + Math.random() * 8;
     }
   }
-  screensaverFrame = setTimeout(ssDraw, 50);
+  screensaverFrame = setTimeout(ssDraw, isMobile ? 100 : 50);
 }
 
 function showScreensaver() {
@@ -871,8 +874,7 @@ function resetIdleTimer() {
 }
 
 function initScreensaver() {
-  if (isMobile) return;
-  ['mousemove', 'keydown', 'click'].forEach(ev => {
+  ['mousemove', 'keydown', 'click', 'touchstart'].forEach(ev => {
     document.addEventListener(ev, resetIdleTimer);
   });
   document.addEventListener('keydown', () => {
