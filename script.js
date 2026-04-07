@@ -580,6 +580,8 @@ function initAboutPanel() {
     const rect   = panel.getBoundingClientRect();
     const rpRect = getRightPanel().getBoundingClientRect();
     panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.transform = 'none';
     panel.style.top   = (rect.top  - rpRect.top)  / stageScale + 'px';
     panel.style.left  = (rect.left - rpRect.left) / stageScale + 'px';
     ox = (e.clientX - rect.left) / stageScale;

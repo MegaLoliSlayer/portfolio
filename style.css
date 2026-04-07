@@ -205,7 +205,7 @@ html, body {
   max-height: calc(100% - 40px - 16px);
   display: none;
   flex-direction: column;
-  background: var(--terminal-bg);
+  background: rgba(5, 5, 15, 0.52);
   border: 1px solid #00ffcc44;
   border-radius: 8px;
   box-shadow: var(--glow), inset 0 0 60px rgba(0,255,204,0.04);
@@ -943,16 +943,18 @@ html, body {
 /* ─── About Panel ────────────────────────────── */
 #about-panel {
   position: absolute;
-  top: 60px;
-  left: 40px;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 13;
-  width: 440px;
-  height: 520px;
+  width: 480px;
+  height: 340px;
   min-width: 260px;
   min-height: 48px;
   max-width: calc(100% - 48px);
   max-height: calc(100% - 40px - 48px);
-  background: #080810;
+  background: rgba(8, 8, 16, 0.52);
+  backdrop-filter: blur(8px);
   border: 3px solid #1a1a2e;
   border-radius: 14px;
   box-shadow: 0 0 0 1px #00ffcc22, 0 0 24px rgba(0,0,0,0.9),
