@@ -30,6 +30,7 @@ function updateLainWidth() {
 
 // ─── Window Focus Management ──────────────────────────────────
 let topZ = 20;
+let terminalProcessing = false;
 function bringToFront(el) {
   el.style.zIndex = ++topZ;
 }
@@ -88,6 +89,21 @@ const TV_FILES = [
   'lain29.gif', 'lain3.gif',  'lain30.gif', 'lain31.gif',
   'lain4.gif',  'lain6.gif',  'lain7.gif',  'lain9.gif',
 ].map(f => 'TV/' + f);
+
+// ─── Wired Chatter Messages ───────────────────────────────────
+const WIRED_MESSAGES = [
+  '[wired] packet loss detected on layer 7',
+  '[wired] protocol 7 handshake initiated...',
+  '[wired] knights are watching',
+  '[wired] present day, present time...',
+  '[wired] anonymous node pinged you',
+  '[wired] memory leak in /dev/self',
+  '[wired] no such thing as offline',
+  '[wired] schumann resonance unstable',
+  '[wired] god is in the network',
+  '[wired] close the world, open the nExt',
+  '[wired] you are already connected',
+];
 
 // ─── Lain Dialog Lines ────────────────────────────────────────
 const LAIN_DIALOGS = [
@@ -722,18 +738,136 @@ async function runTerminalSequence() {
     }
   });
 
-  let processing = false;
   input.addEventListener('keydown', async (e) => {
-    if (e.key === 'Enter' && !processing) {
-      processing = true;
+    if (e.key === 'Enter' && !terminalProcessing) {
+      terminalProcessing = true;
       const cmd = input.value;
       input.value = '';
       hidePrompt();
       await handleCommand(cmd);
       showPrompt();
-      processing = false;
+      terminalProcessing = false;
     }
   });
+
+  scheduleWiredMessage();
+}
+
+function injectWiredMessage() {
+  if (terminalProcessing) return;
+  const input = document.getElementById('terminal-input');
+  if (!input || input.value !== '') return;
+  const screen2 = document.getElementById('screen2');
+  if (!screen2 || !screen2.classList.contains('active')) return;
+  const idx = Math.floor(Math.random() * WIRED_MESSAGES.length);
+  const out = document.getElementById('terminal-output');
+  if (!out) return;
+  const div = document.createElement('div');
+  div.className = 'wired-msg';
+  div.textContent = WIRED_MESSAGES[idx];
+  out.appendChild(div);
+  scrollTerminal();
+}
+
+function scheduleWiredMessage() {
+  const delay = 60000 + Math.random() * 60000;
+  setTimeout(() => { injectWiredMessage(); scheduleWiredMessage(); }, delay);
+}
+
+// ─── Idle Screensaver ────────────────────────────────────────
+const SCREENSAVER_IDLE_MS = 45000;
+const SCREENSAVER_PHRASES = [
+  'PRESENT DAY', 'PRESENT TIME', 'LAYER 07', 'CLOSE THE WORLD',
+];
+const KATAKANA = 'アァカサタナハマヤラワンイィキシチニヒミリウゥクスツヌフムユルヴエェケセテネヘメレオォコソトノホモヨロヲ0123456789ABCDEF';
+
+let screensaverTimer = null;
+let screensaverFrame = null;
+let screensaverActive = false;
+let ssCanvas, ssCtx, ssColumns;
+
+function ssResize() {
+  if (!ssCanvas) return;
+  ssCanvas.width  = window.innerWidth;
+  ssCanvas.height = window.innerHeight;
+  const colWidth = 16;
+  const cols = Math.ceil(ssCanvas.width / colWidth);
+  ssColumns = [];
+  for (let i = 0; i < cols; i++) {
+    ssColumns.push({
+      x: i * colWidth,
+      y: Math.random() * ssCanvas.height,
+      speed: 6 + Math.random() * 8,
+      phrase: null,
+      phraseIdx: 0,
+    });
+  }
+}
+
+function ssDraw() {
+  if (!screensaverActive) return;
+  ssCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+  ssCtx.fillRect(0, 0, ssCanvas.width, ssCanvas.height);
+  ssCtx.font = '14px "Share Tech Mono", monospace';
+  ssCtx.fillStyle = '#00ffcc';
+  ssCtx.shadowColor = '#00ffcc';
+  ssCtx.shadowBlur = 6;
+  for (const col of ssColumns) {
+    let ch;
+    if (col.phrase) {
+      ch = col.phrase[col.phraseIdx];
+      col.phraseIdx++;
+      if (col.phraseIdx >= col.phrase.length) col.phrase = null;
+    } else {
+      ch = KATAKANA[Math.floor(Math.random() * KATAKANA.length)];
+      if (Math.random() < 0.0008) {
+        col.phrase = SCREENSAVER_PHRASES[Math.floor(Math.random() * SCREENSAVER_PHRASES.length)];
+        col.phraseIdx = 0;
+      }
+    }
+    ssCtx.fillText(ch, col.x, col.y);
+    col.y += col.speed;
+    if (col.y > ssCanvas.height + 40) {
+      col.y = -20;
+      col.speed = 6 + Math.random() * 8;
+    }
+  }
+  screensaverFrame = setTimeout(ssDraw, 50);
+}
+
+function showScreensaver() {
+  if (screensaverActive) return;
+  screensaverActive = true;
+  if (!ssCanvas) {
+    ssCanvas = document.getElementById('screensaver');
+    ssCtx = ssCanvas.getContext('2d');
+  }
+  ssResize();
+  ssCtx.fillStyle = '#000';
+  ssCtx.fillRect(0, 0, ssCanvas.width, ssCanvas.height);
+  ssCanvas.classList.add('active');
+  ssDraw();
+}
+
+function hideScreensaver() {
+  if (!screensaverActive) return;
+  screensaverActive = false;
+  if (screensaverFrame) { clearTimeout(screensaverFrame); screensaverFrame = null; }
+  if (ssCanvas) ssCanvas.classList.remove('active');
+}
+
+function resetIdleTimer() {
+  if (screensaverActive) hideScreensaver();
+  if (screensaverTimer) clearTimeout(screensaverTimer);
+  screensaverTimer = setTimeout(showScreensaver, SCREENSAVER_IDLE_MS);
+}
+
+function initScreensaver() {
+  ['mousemove', 'keydown', 'click'].forEach(ev => {
+    document.addEventListener(ev, resetIdleTimer);
+  });
+  window.addEventListener('resize', () => { if (screensaverActive) ssResize(); });
+  resetIdleTimer();
 }
 
 // ─── Start ────────────────────────────────────────────────────
@@ -744,6 +878,7 @@ initTvPanel();
 initTerminalDrag();
 initConnectionsSidebar();
 initBgPicker();
+initScreensaver();
 
 // ─── Viewport Resize: clamp dragged panels within bounds ──────
 window.addEventListener('resize', () => {

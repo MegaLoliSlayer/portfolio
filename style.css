@@ -916,3 +916,23 @@ html, body {
   color: var(--accent);
   box-shadow: 0 0 6px #00ffcc44;
 }
+
+/* ─── Idle Screensaver ───────────────────────── */
+#screensaver {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  background: #000;
+}
+
+#screensaver.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.wired-msg { color: #00ffcc; opacity: 0.55; font-style: italic; margin: 2px 0; }
