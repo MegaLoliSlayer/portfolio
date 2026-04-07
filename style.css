@@ -67,7 +67,7 @@
 html, body {
   width: 100%;
   height: 100%;
-  background: var(--bg);
+  background: #000;
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
   overflow: hidden;

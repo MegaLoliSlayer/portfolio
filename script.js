@@ -891,18 +891,19 @@ initConnectionsSidebar();
 initBgPicker();
 initScreensaver();
 
-// ─── Stage Scaling (stretch like an image) ─────────────────
-const STAGE_W = window.innerWidth;
-const STAGE_H = window.innerHeight;
+// ─── Stage Scaling (uniform fit, letterbox) ────────────────
+const STAGE_W = window.screen.availWidth  || window.innerWidth;
+const STAGE_H = window.screen.availHeight || window.innerHeight;
 (function initStage() {
   const stage = document.getElementById('stage');
   if (!stage) return;
   stage.style.width  = STAGE_W + 'px';
   stage.style.height = STAGE_H + 'px';
   function apply() {
-    const sx = window.innerWidth  / STAGE_W;
-    const sy = window.innerHeight / STAGE_H;
-    stage.style.transform = `scale(${sx}, ${sy})`;
+    const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+    const offX = (window.innerWidth  - STAGE_W * scale) / 2;
+    const offY = (window.innerHeight - STAGE_H * scale) / 2;
+    stage.style.transform = `translate(${offX}px, ${offY}px) scale(${scale})`;
   }
   window.addEventListener('resize', apply);
   apply();
