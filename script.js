@@ -31,6 +31,7 @@ function updateLainWidth() {
 // ─── Window Focus Management ──────────────────────────────────
 let topZ = 20;
 let terminalProcessing = false;
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 function bringToFront(el) {
   el.style.zIndex = ++topZ;
 }
@@ -870,6 +871,7 @@ function resetIdleTimer() {
 }
 
 function initScreensaver() {
+  if (isMobile) return;
   ['mousemove', 'keydown', 'click'].forEach(ev => {
     document.addEventListener(ev, resetIdleTimer);
   });
@@ -897,7 +899,6 @@ initScreensaver();
 // ─── Stage Scaling (uniform fit, letterbox) ────────────────
 // Mobile/narrow viewports get a fixed desktop reference so the
 // full layout always renders, just shrunk to fit.
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const STAGE_W = isMobile ? 1600 : (window.screen.availWidth  || window.innerWidth);
 const STAGE_H = isMobile ? 900  : (window.screen.availHeight || window.innerHeight);
 let stageScale = 1;
