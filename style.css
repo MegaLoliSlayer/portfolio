@@ -205,10 +205,11 @@ html, body {
   max-height: calc(100% - 40px - 16px);
   display: none;
   flex-direction: column;
-  background: rgba(5, 5, 15, 0.52);
-  border: 1px solid #00ffcc44;
-  border-radius: 8px;
-  box-shadow: var(--glow), inset 0 0 60px rgba(0,255,204,0.04);
+  background: rgba(8, 8, 16, 0.52);
+  border: 3px solid #1a1a2e;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px #00ffcc22, 0 0 24px rgba(0,0,0,0.9),
+              inset 0 0 12px rgba(0,0,0,0.6);
   backdrop-filter: blur(8px);
   overflow: hidden;
   resize: both;
@@ -452,7 +453,8 @@ html, body {
   max-height: calc(100% - 40px - 48px);
   display: flex;
   flex-direction: column;
-  background: #080810;
+  background: rgba(8, 8, 16, 0.52);
+  backdrop-filter: blur(8px);
   border: 3px solid #1a1a2e;
   border-radius: 14px;
   box-shadow: 0 0 0 1px #00ffcc22, 0 0 24px rgba(0,0,0,0.9),
@@ -578,10 +580,11 @@ html, body {
   right: 0;
   z-index: 10;
   width: 300px;
-  background: var(--terminal-bg);
-  border: 1px solid #00ffcc44;
-  border-radius: 8px;
-  box-shadow: var(--glow), inset 0 0 60px rgba(0,255,204,0.04);
+  background: rgba(8, 8, 16, 0.52);
+  border: 3px solid #1a1a2e;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px #00ffcc22, 0 0 24px rgba(0,0,0,0.9),
+              inset 0 0 12px rgba(0,0,0,0.6);
   backdrop-filter: blur(8px);
   overflow: hidden;
   opacity: 0;
@@ -797,8 +800,10 @@ html, body {
   bottom: 40px;
   width: 260px;
   z-index: 20;
-  background: var(--terminal-bg);
-  border-right: 1px solid #00ffcc33;
+  background: rgba(8, 8, 16, 0.52);
+  border-right: 3px solid #1a1a2e;
+  box-shadow: 0 0 0 1px #00ffcc22, 0 0 24px rgba(0,0,0,0.9),
+              inset 0 0 12px rgba(0,0,0,0.6);
   backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
@@ -866,10 +871,11 @@ html, body {
   transform: translate(-50%, -50%);
   width: 320px;
   z-index: 20;
-  background: var(--terminal-bg);
-  border: 1px solid #00ffcc44;
-  border-radius: 8px;
-  box-shadow: var(--glow);
+  background: rgba(8, 8, 16, 0.52);
+  border: 3px solid #1a1a2e;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px #00ffcc22, 0 0 24px rgba(0,0,0,0.9),
+              inset 0 0 12px rgba(0,0,0,0.6);
   backdrop-filter: blur(8px);
   overflow: hidden;
   display: none;
@@ -979,7 +985,14 @@ html, body {
 }
 
 #about-panel.about-first-show {
-  animation: music-zoomout 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: about-zoomout 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform-origin: bottom center;
+}
+
+@keyframes about-zoomout {
+  0%   { transform: translateX(-50%) scale(2); opacity: 0; }
+  45%  { opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
 #about-panel.dragging .about-titlebar {
