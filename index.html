@@ -154,6 +154,75 @@
         <div class="picker-grid" id="picker-grid"></div>
       </div>
 
+      <!-- About Panel -->
+      <div id="about-panel">
+        <div class="about-titlebar">
+          <span class="dot dot-red about-dot" onclick="toggleAboutPanel()" title="Close">&#10005;</span>
+          <span class="dot dot-yellow about-dot" title="Minimize">&#8722;</span>
+          <span class="dot dot-green about-dot" title="Restore">&#43;</span>
+          <span class="about-title">SADAME@WIRED:~/about_me</span>
+        </div>
+        <div class="about-tabs">
+          <button class="about-tab active" data-lang="en" onclick="switchAboutLang('en')">[ EN ]</button>
+          <button class="about-tab" data-lang="zh" onclick="switchAboutLang('zh')">[ 中文 ]</button>
+        </div>
+        <div class="about-body">
+          <div class="about-content active" data-lang="en">
+            <div class="about-block">
+              <p>There's really nothing special about me.</p>
+              <p><span class="about-key">Pluviophile</span> <span class="about-dim">(n. people who love rain)</span> describes me well — I hate the flowing of time, and I believe rain has the magic to stop everything from moving.</p>
+              <p>I really hate sunny days, and I hate people hustling on their ways just for money or a hollow goal. I won't put more details on the deeper stuff — diving into my mind makes me exhausted, and I really wish to prevent that from happening <span class="about-dim">(to you and to me)...</span></p>
+            </div>
+
+            <div class="about-section">
+              <div class="about-heading">// what i like</div>
+              <p>I like all sorts of games but I'm not a pro <span class="about-dim">(mainly PSN, NS and PC)</span>, and I watch a lot of anime just to keep me away from reality. The music I listen to is mainly thrash and industrial metal, but I do listen to some ACG music as well.</p>
+              <ul class="about-list">
+                <li><span class="about-label">favorite band</span><span class="about-sep">::</span><span class="about-val">Rammstein / Pantera</span></li>
+                <li><span class="about-label">favorite acg producer</span><span class="about-sep">::</span><span class="about-val">麻枝 准 (Jun Maeda)</span></li>
+                <li><span class="about-label">movie bible</span><span class="about-sep">::</span><span class="about-val">Fight Club</span></li>
+                <li><span class="about-label">anime bible</span><span class="about-sep">::</span><span class="about-val">Evangelion</span></li>
+              </ul>
+            </div>
+
+            <div class="about-section">
+              <div class="about-heading">// what i do</div>
+              <p>Gaming and anime occupy most of my time <span class="about-dim">(currently majoring in Computer Engineering, so I have to study sometimes)</span>.</p>
+              <p>But if you ask me what I like the most: <span class="about-key">doing nothing...</span></p>
+            </div>
+          </div>
+
+          <div class="about-content" data-lang="zh">
+            <div class="about-block">
+              <p>鼠鼠稍微有点宅，除了上学之外基本上都在家里躺尸。</p>
+              <p>喜欢下雨，讨厌晴天 —— 下雨可以停止时间 <span class="about-dim">(鼠鼠是这么认为的)</span>。具体为什么就不解释了 <span class="about-dim">(缕清自己的思绪很累，所以想尽量控制自己不要多想)</span>。</p>
+              <p>总之希望大家都能开心地做自己想做的事情。</p>
+            </div>
+
+            <div class="about-section">
+              <div class="about-heading">// 喜欢的事情</div>
+              <p>某只兔子 🐰</p>
+              <p>喜欢各种类型的游戏（每个平台都有玩：PSN / NS / PC）；喜欢收集游戏（穷学生库存不太丰富），有时候太累了就不想玩，所以很多游戏都在库里躺着吃灰。</p>
+              <p>喜欢收集手办（经常为了买游戏和手办饿肚子）。</p>
+              <p>喜欢看番，什么类型的都会看，最喜欢日常和意识流。</p>
+              <p>喜欢工业和鞭挞金属，也喜欢 ACG（偶尔也会收集两张自己喜欢乐队的专辑）。</p>
+              <ul class="about-list">
+                <li><span class="about-label">最喜欢的乐队</span><span class="about-sep">::</span><span class="about-val">Rammstein / Pantera</span></li>
+                <li><span class="about-label">最喜欢的 ACG 制作人</span><span class="about-sep">::</span><span class="about-val">麻枝 准</span></li>
+                <li><span class="about-label">电影圣经</span><span class="about-sep">::</span><span class="about-val">搏击俱乐部</span></li>
+                <li><span class="about-label">动漫圣经</span><span class="about-sep">::</span><span class="about-val">新世纪福音战士</span></li>
+              </ul>
+            </div>
+
+            <div class="about-section">
+              <div class="about-heading">// 鼠鼠的日常</div>
+              <p>平时主要都在打游戏和看番，因为大学专业选的是 Computer Engineering，所以偶尔也会学习 <span class="about-dim">(弄反了 bushi)</span>。</p>
+              <p>但是平时还是最喜欢 <span class="about-key">躺尸...</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Taskbar -->
       <div id="taskbar">
         <div id="taskbar-buttons">
@@ -162,6 +231,7 @@
           <button class="tb-btn" id="tb-music"       onclick="toggleMusicPanel()">♪ music</button>
           <button class="tb-btn" id="tb-tv"          onclick="taskbarToggleTv()">⊞ tv</button>
           <button class="tb-btn" id="tb-background"  onclick="toggleBgPicker()">◈ background</button>
+          <button class="tb-btn" id="tb-about"       onclick="toggleAboutPanel()">☻ about</button>
         </div>
         <span class="tb-label">SADAME@WIRED</span>
         <div id="power-wrap">

@@ -51,6 +51,7 @@ function updateTaskbar() {
     'tb-music':       document.getElementById('music-panel').classList.contains('visible'),
     'tb-tv':          document.getElementById('tv-panel').classList.contains('visible'),
     'tb-background':  document.getElementById('bg-picker').classList.contains('visible'),
+    'tb-about':       document.getElementById('about-panel').classList.contains('visible'),
   };
   Object.entries(states).forEach(([id, active]) => {
     document.getElementById(id).classList.toggle('active', active);
@@ -461,6 +462,7 @@ async function printHelp() {
   const lines = [
     '──────────────────────────────────────────────',
     '  help              show this message',
+    '  about             print about_me',
     '  ls ./connections  list profile links',
     '  vim [name]        open profile page',
     '                    e.g. vim GitHub',
@@ -526,6 +528,82 @@ function toggleMusicPanel() {
     panel.classList.add('visible');
   }
   updateTaskbar();
+}
+
+function toggleAboutPanel() {
+  const panel = document.getElementById('about-panel');
+  if (panel.classList.contains('visible')) {
+    panel.classList.remove('visible');
+  } else {
+    panel.classList.add('visible');
+    bringToFront(panel);
+  }
+  updateTaskbar();
+}
+
+function switchAboutLang(lang) {
+  document.querySelectorAll('#about-panel .about-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.lang === lang);
+  });
+  document.querySelectorAll('#about-panel .about-content').forEach(c => {
+    c.classList.toggle('active', c.dataset.lang === lang);
+  });
+}
+
+async function printAbout() {
+  const out = getOutput();
+  const line = s => { out.insertAdjacentText('beforeend', s + '\n'); scrollTerminal(); };
+  const lines = [
+    '──────────────────────────────────────────────',
+    '           // ABOUT :: SADAME //',
+    '──────────────────────────────────────────────',
+    '',
+    '[ EN ]',
+    '  There\'s really nothing special about me.',
+    '  Pluviophile (n. people who love rain) describes me well',
+    '  — I hate the flowing of time, and I believe rain has',
+    '  the magic to stop everything from moving.',
+    '',
+    '  I hate sunny days, and people hustling for money or',
+    '  a hollow goal. Diving into my mind makes me exhausted,',
+    '  so I\'ll keep the deeper stuff to myself.',
+    '',
+    '  // what i like',
+    '    games (PSN / NS / PC), anime, thrash & industrial metal.',
+    '      favorite band          :: Rammstein / Pantera',
+    '      favorite acg producer  :: 麻枝 准 (Jun Maeda)',
+    '      movie bible            :: Fight Club',
+    '      anime bible            :: Evangelion',
+    '',
+    '  // what i do',
+    '    gaming + anime. majoring in computer engineering.',
+    '    but what I like the most: doing nothing...',
+    '',
+    '──────────────────────────────────────────────',
+    '',
+    '[ 中文 ]',
+    '  鼠鼠稍微有点宅，除了上学之外基本都在家里躺尸。',
+    '  喜欢下雨讨厌晴天 —— 下雨可以停止时间（鼠鼠是这么认为的）。',
+    '  缕清自己的思绪很累，所以尽量控制自己不要多想。',
+    '  希望大家都能开心地做自己想做的事情。',
+    '',
+    '  // 喜欢的事情',
+    '    某只兔子、游戏（PSN / NS / PC）、手办、番剧、金属与ACG。',
+    '      最喜欢的乐队        :: Rammstein / Pantera',
+    '      最喜欢的ACG制作人   :: 麻枝 准',
+    '      电影圣经            :: 搏击俱乐部',
+    '      动漫圣经            :: 新世纪福音战士',
+    '',
+    '  // 鼠鼠的日常',
+    '    大学专业是 computer engineering，偶尔也会学习。',
+    '    但最喜欢的还是 —— 躺尸...',
+    '',
+    '──────────────────────────────────────────────',
+  ];
+  for (const l of lines) {
+    line(l);
+    await wait(18);
+  }
 }
 
 function toggleMusicMinimize() {
@@ -603,6 +681,9 @@ async function handleCommand(raw) {
 
   } else if (lower === 'help') {
     await printHelp();
+
+  } else if (lower === 'about' || lower === 'about me' || lower === 'whoami') {
+    await printAbout();
 
   } else if (lower === 'ls ./connections') {
     await printLinks();
