@@ -223,10 +223,10 @@ function initBgPicker() {
     const rect   = picker.getBoundingClientRect();
     const rpRect = getRightPanel().getBoundingClientRect();
     picker.style.transform = 'none';
-    picker.style.top  = (rect.top  - rpRect.top)  + 'px';
-    picker.style.left = (rect.left - rpRect.left) + 'px';
-    ox = e.clientX - rect.left;
-    oy = e.clientY - rect.top;
+    picker.style.top  = (rect.top  - rpRect.top)  / stageScale + 'px';
+    picker.style.left = (rect.left - rpRect.left) / stageScale + 'px';
+    ox = (e.clientX - rect.left) / stageScale;
+    oy = (e.clientY - rect.top)  / stageScale;
     e.preventDefault();
   });
 
@@ -234,8 +234,8 @@ function initBgPicker() {
     if (!dragging) return;
     const rp = getRightPanel();
     const rpRect = rp.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - ox - rpRect.left, rp.offsetWidth  - picker.offsetWidth));
-    const y = Math.max(0, Math.min(e.clientY - oy - rpRect.top,  rp.offsetHeight - picker.offsetHeight - 40));
+    const x = Math.max(0, Math.min((e.clientX - rpRect.left) / stageScale - ox, rp.offsetWidth  - picker.offsetWidth));
+    const y = Math.max(0, Math.min((e.clientY - rpRect.top)  / stageScale - oy, rp.offsetHeight - picker.offsetHeight - 40));
     picker.style.left = x + 'px';
     picker.style.top  = y + 'px';
   });
