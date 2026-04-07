@@ -880,6 +880,28 @@ initConnectionsSidebar();
 initBgPicker();
 initScreensaver();
 
+// ─── Power Menu ──────────────────────────────────────────────
+function togglePowerMenu(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('power-menu').classList.toggle('visible');
+}
+function closePowerMenu() {
+  document.getElementById('power-menu').classList.remove('visible');
+}
+function powerSleep() {
+  closePowerMenu();
+  if (screensaverActive) hideScreensaver();
+  else showScreensaver();
+}
+function powerShutdown() {
+  closePowerMenu();
+  window.close();
+  setTimeout(() => { document.body.innerHTML = ''; document.body.style.background = '#000'; }, 100);
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#power-wrap')) closePowerMenu();
+});
+
 // ─── Viewport Resize: clamp dragged panels within bounds ──────
 window.addEventListener('resize', () => {
   updateLainWidth();

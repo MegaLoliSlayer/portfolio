@@ -729,6 +729,51 @@ html, body {
   box-shadow: 0 0 6px #00ffcc44;
 }
 
+#power-wrap {
+  position: relative;
+  margin-left: 6px;
+}
+
+#tb-power {
+  font-size: 0.95rem;
+  padding: 2px 10px;
+}
+
+#power-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  min-width: 140px;
+  background: rgba(5, 5, 15, 0.96);
+  border: 1px solid #00ffcc66;
+  box-shadow: 0 0 12px #00ffcc44;
+  display: none;
+  flex-direction: column;
+  padding: 4px;
+  gap: 2px;
+  z-index: 10000;
+}
+
+#power-menu.visible { display: flex; }
+
+.power-opt {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #00ffccbb;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  text-align: left;
+  padding: 6px 10px;
+  animation: cursor-pointer 800ms steps(1) infinite;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.power-opt:hover {
+  background: rgba(0, 255, 204, 0.1);
+  color: var(--accent);
+  border-color: #00ffcc55;
+}
+
 .tb-label {
   margin-left: auto;
   font-size: 0.72rem;
