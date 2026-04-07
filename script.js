@@ -912,7 +912,7 @@ let stageScale = 1;
     const offY = (window.innerHeight - STAGE_H * stageScale) / 2;
     stage.style.transform = `translate(${offX}px, ${offY}px) scale(${stageScale})`;
   }
-  window.addEventListener('resize', apply);
+  if (!isMobile) window.addEventListener('resize', apply);
   apply();
 })();
 
@@ -942,6 +942,7 @@ document.addEventListener('click', (e) => {
 
 // ─── Viewport Resize: clamp dragged panels within bounds ──────
 window.addEventListener('resize', () => {
+  if (isMobile) return;
   updateLainWidth();
 
   const rp = document.getElementById('right-panel');
