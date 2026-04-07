@@ -197,7 +197,7 @@ html, body {
 /* ─── Screen 2: Terminal Window ──────────────────── */
 .terminal-window {
   position: absolute;
-  z-index: 12;
+  z-index: 30;
   width: min(680px, 92%);
   min-width: 320px;
   min-height: 42px;
