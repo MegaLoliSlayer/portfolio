@@ -891,6 +891,20 @@ initConnectionsSidebar();
 initBgPicker();
 initScreensaver();
 
+// ─── Stage Scaling ──────────────────────────────────────────
+const STAGE_W = 1920;
+const STAGE_H = 1080;
+function applyStageScale() {
+  const stage = document.getElementById('stage');
+  if (!stage) return;
+  const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+  const offX = (window.innerWidth  - STAGE_W * scale) / 2;
+  const offY = (window.innerHeight - STAGE_H * scale) / 2;
+  stage.style.transform = `translate(${offX}px, ${offY}px) scale(${scale})`;
+}
+window.addEventListener('resize', applyStageScale);
+applyStageScale();
+
 // ─── Power Menu ──────────────────────────────────────────────
 function togglePowerMenu(e) {
   if (e) e.stopPropagation();
