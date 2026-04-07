@@ -441,8 +441,8 @@ html, body {
 /* ─── TV Panel ───────────────────────────────────── */
 #tv-panel {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: 0;
+  right: 0;
   z-index: 11;
   transform-origin: top right;
   width: 260px;
@@ -575,7 +575,7 @@ html, body {
 #music-panel {
   position: absolute;
   bottom: 40px;
-  right: 24px;
+  right: 0;
   z-index: 10;
   width: 300px;
   background: var(--terminal-bg);
