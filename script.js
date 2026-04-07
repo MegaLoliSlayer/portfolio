@@ -704,6 +704,9 @@ async function runTerminalSequence() {
 
   updateTaskbar();
 
+  // Connections sidebar opens by default
+  toggleConnectionsSidebar();
+
   // Show interactive prompt and wire up Enter key
   showPrompt();
 
