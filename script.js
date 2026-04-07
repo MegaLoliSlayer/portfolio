@@ -899,10 +899,9 @@ function applyStageScale() {
   if (!stage) return;
   stage.style.width  = STAGE_W + 'px';
   stage.style.height = STAGE_H + 'px';
-  const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
-  const offX = (window.innerWidth  - STAGE_W * scale) / 2;
-  const offY = (window.innerHeight - STAGE_H * scale) / 2;
-  stage.style.transform = `translate(${offX}px, ${offY}px) scale(${scale})`;
+  const sx = window.innerWidth  / STAGE_W;
+  const sy = window.innerHeight / STAGE_H;
+  stage.style.transform = `scale(${sx}, ${sy})`;
 }
 window.addEventListener('resize', applyStageScale);
 applyStageScale();
