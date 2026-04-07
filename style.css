@@ -287,7 +287,13 @@ html, body {
   font-size: clamp(0.85rem, 1.8vw, 1rem);
   line-height: 1.8;
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #00ffcc44 transparent;
 }
+
+.terminal-body::-webkit-scrollbar { width: 6px; }
+.terminal-body::-webkit-scrollbar-thumb { background: #00ffcc44; border-radius: 3px; }
+.terminal-body::-webkit-scrollbar-track { background: transparent; }
 
 /* Minimized: hide body */
 .terminal-window.minimized .terminal-body {
@@ -580,6 +586,10 @@ html, body {
   right: 0;
   z-index: 10;
   width: 300px;
+  max-width: calc(100% - 16px);
+  max-height: calc(100% - 40px - 16px);
+  display: flex;
+  flex-direction: column;
   background: rgba(8, 8, 16, 0.52);
   border: 3px solid #1a1a2e;
   border-radius: 14px;
@@ -650,7 +660,14 @@ html, body {
 
 .music-content {
   padding: 10px 12px 12px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #00ffcc44 transparent;
 }
+.music-content::-webkit-scrollbar { width: 6px; }
+.music-content::-webkit-scrollbar-thumb { background: #00ffcc44; border-radius: 3px; }
 
 /* Spotify iframe container */
 #embed-iframe {
