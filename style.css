@@ -253,6 +253,7 @@ html, body {
   text-shadow: 0 0 10px var(--accent), 0 0 18px var(--accent);
   transform: scale(1.15);
 }
+.dot-red { font-size: 13px; }
 .dot-red:hover {
   color: #ff003c;
   text-shadow: 0 0 10px #ff003c, 0 0 18px #ff003c;
