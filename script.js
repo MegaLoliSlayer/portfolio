@@ -891,6 +891,16 @@ initConnectionsSidebar();
 initBgPicker();
 initScreensaver();
 
+// ─── Dynamic Page Scaling ───────────────────────────────────
+const REF_W = window.screen.availWidth  || 1920;
+const REF_H = window.screen.availHeight || 1080;
+function applyPageScale() {
+  const scale = Math.min(window.innerWidth / REF_W, window.innerHeight / REF_H);
+  document.body.style.zoom = scale;
+}
+window.addEventListener('resize', applyPageScale);
+applyPageScale();
+
 // ─── Power Menu ──────────────────────────────────────────────
 function togglePowerMenu(e) {
   if (e) e.stopPropagation();
