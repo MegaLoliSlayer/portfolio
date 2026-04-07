@@ -894,9 +894,9 @@ initScreensaver();
 // ─── Stage Scaling (uniform fit, letterbox) ────────────────
 // Mobile/narrow viewports get a fixed desktop reference so the
 // full layout always renders, just shrunk to fit.
-const isNarrow = window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
-const STAGE_W = isNarrow ? 1600 : (window.screen.availWidth  || window.innerWidth);
-const STAGE_H = isNarrow ? 900  : (window.screen.availHeight || window.innerHeight);
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const STAGE_W = isMobile ? 1600 : (window.screen.availWidth  || window.innerWidth);
+const STAGE_H = isMobile ? 900  : (window.screen.availHeight || window.innerHeight);
 let stageScale = 1;
 (function initStage() {
   const stage = document.getElementById('stage');
