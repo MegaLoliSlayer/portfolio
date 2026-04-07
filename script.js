@@ -892,13 +892,11 @@ initBgPicker();
 initScreensaver();
 
 // ─── Stage Scaling ──────────────────────────────────────────
-const STAGE_W = window.screen.availWidth  || window.innerWidth;
-const STAGE_H = window.screen.availHeight || window.innerHeight;
+const STAGE_W = 1920;
+const STAGE_H = 1080;
 function applyStageScale() {
   const stage = document.getElementById('stage');
   if (!stage) return;
-  stage.style.width  = STAGE_W + 'px';
-  stage.style.height = STAGE_H + 'px';
   const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
   const offX = (window.innerWidth  - STAGE_W * scale) / 2;
   const offY = (window.innerHeight - STAGE_H * scale) / 2;
