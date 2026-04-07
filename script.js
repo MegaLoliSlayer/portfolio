@@ -317,6 +317,7 @@ function toggleTvMinimize() {
 
 function expandTvPanel() {
   const panel = document.getElementById('tv-panel');
+  if (!panel.classList.contains('minimized')) return;
   panel.classList.remove('minimized');
   panel.style.width  = panel.dataset.savedWidth  || '';
   panel.style.height = panel.dataset.savedHeight || '';
@@ -376,6 +377,7 @@ function minimizeTerminal() {
 
 function restoreTerminal() {
   const win = document.querySelector('.terminal-window');
+  if (!win.classList.contains('minimized')) return;
   win.classList.remove('minimized');
   win.style.width  = win.dataset.savedWidth  || '';
   win.style.height = win.dataset.savedHeight || '';
@@ -562,6 +564,7 @@ function minimizeAboutPanel() {
 
 function expandAboutPanel() {
   const panel = document.getElementById('about-panel');
+  if (!panel.classList.contains('minimized')) return;
   panel.classList.remove('minimized');
   panel.style.width  = panel.dataset.savedWidth  || '';
   panel.style.height = panel.dataset.savedHeight || '';
@@ -681,7 +684,9 @@ function toggleMusicPlaylist() {
 }
 
 function expandMusicPanel() {
-  document.getElementById('music-panel').classList.remove('minimized');
+  const panel = document.getElementById('music-panel');
+  if (!panel.classList.contains('minimized')) return;
+  panel.classList.remove('minimized');
 }
 
 function initMusicDrag() {
