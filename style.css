@@ -492,23 +492,6 @@ html, body {
   letter-spacing: 0.08em;
 }
 
-.tv-dot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 8px;
-  font-weight: 700;
-  color: rgba(0,0,0,0.55);
-  animation: cursor-pointer 800ms steps(1) infinite;
-  line-height: 1;
-  transition: filter 0.15s;
-}
-
-.tv-dot:hover {
-  filter: brightness(0.75);
-  color: rgba(0,0,0,0.85);
-}
-
 .tv-content {
   flex: 1;
   min-height: 0;
@@ -628,23 +611,6 @@ html, body {
 
 #music-panel.dragging .music-titlebar {
   animation: cursor-drag 800ms steps(1) infinite;
-}
-
-.music-dot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 8px;
-  font-weight: 700;
-  color: rgba(0, 0, 0, 0.55);
-  animation: cursor-pointer 800ms steps(1) infinite;
-  line-height: 1;
-  transition: filter 0.15s;
-}
-
-.music-dot:hover {
-  filter: brightness(0.75);
-  color: rgba(0, 0, 0, 0.85);
 }
 
 .music-title-wrap {
