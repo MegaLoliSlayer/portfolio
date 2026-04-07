@@ -328,10 +328,10 @@ function initTvPanel() {
     const rect   = panel.getBoundingClientRect();
     const rpRect = getRightPanel().getBoundingClientRect();
     panel.style.right = 'auto';
-    panel.style.top   = (rect.top  - rpRect.top)  + 'px';
-    panel.style.left  = (rect.left - rpRect.left) + 'px';
-    ox = e.clientX - rect.left;
-    oy = e.clientY - rect.top;
+    panel.style.top   = (rect.top  - rpRect.top)  / stageScale + 'px';
+    panel.style.left  = (rect.left - rpRect.left) / stageScale + 'px';
+    ox = (e.clientX - rect.left) / stageScale;
+    oy = (e.clientY - rect.top)  / stageScale;
     panel.classList.add('dragging');
     e.preventDefault();
   });
@@ -340,8 +340,8 @@ function initTvPanel() {
     if (!dragging) return;
     const rp = getRightPanel();
     const rpRect = rp.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - ox - rpRect.left, rp.offsetWidth  - panel.offsetWidth));
-    const y = Math.max(0, Math.min(e.clientY - oy - rpRect.top,  rp.offsetHeight - panel.offsetHeight - 40));
+    const x = Math.max(0, Math.min((e.clientX - rpRect.left) / stageScale - ox, rp.offsetWidth  - panel.offsetWidth));
+    const y = Math.max(0, Math.min((e.clientY - rpRect.top)  / stageScale - oy, rp.offsetHeight - panel.offsetHeight - 40));
     panel.style.left = x + 'px';
     panel.style.top  = y + 'px';
   });
@@ -385,10 +385,10 @@ function initTerminalDrag() {
     const rpRect = getRightPanel().getBoundingClientRect();
     win.style.position  = 'absolute';
     win.style.transform = 'none';
-    win.style.left = (rect.left - rpRect.left) + 'px';
-    win.style.top  = (rect.top  - rpRect.top)  + 'px';
-    ox = e.clientX - rect.left;
-    oy = e.clientY - rect.top;
+    win.style.left = (rect.left - rpRect.left) / stageScale + 'px';
+    win.style.top  = (rect.top  - rpRect.top)  / stageScale + 'px';
+    ox = (e.clientX - rect.left) / stageScale;
+    oy = (e.clientY - rect.top)  / stageScale;
     win.classList.add('dragging');
     e.preventDefault();
   });
@@ -397,8 +397,8 @@ function initTerminalDrag() {
     if (!dragging) return;
     const rp = getRightPanel();
     const rpRect = rp.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - ox - rpRect.left, rp.offsetWidth  - win.offsetWidth));
-    const y = Math.max(0, Math.min(e.clientY - oy - rpRect.top,  rp.offsetHeight - win.offsetHeight - 40));
+    const x = Math.max(0, Math.min((e.clientX - rpRect.left) / stageScale - ox, rp.offsetWidth  - win.offsetWidth));
+    const y = Math.max(0, Math.min((e.clientY - rpRect.top)  / stageScale - oy, rp.offsetHeight - win.offsetHeight - 40));
     win.style.left = x + 'px';
     win.style.top  = y + 'px';
   });
@@ -545,10 +545,10 @@ function initMusicDrag() {
     const rpRect = getRightPanel().getBoundingClientRect();
     panel.style.bottom = 'auto';
     panel.style.right  = 'auto';
-    panel.style.left   = (rect.left - rpRect.left) + 'px';
-    panel.style.top    = (rect.top  - rpRect.top)  + 'px';
-    ox = e.clientX - rect.left;
-    oy = e.clientY - rect.top;
+    panel.style.left   = (rect.left - rpRect.left) / stageScale + 'px';
+    panel.style.top    = (rect.top  - rpRect.top)  / stageScale + 'px';
+    ox = (e.clientX - rect.left) / stageScale;
+    oy = (e.clientY - rect.top)  / stageScale;
     panel.classList.add('dragging');
     e.preventDefault();
   });
@@ -557,8 +557,8 @@ function initMusicDrag() {
     if (!dragging) return;
     const rp = getRightPanel();
     const rpRect = rp.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - ox - rpRect.left, rp.offsetWidth  - panel.offsetWidth));
-    const y = Math.max(0, Math.min(e.clientY - oy - rpRect.top,  rp.offsetHeight - panel.offsetHeight - 40));
+    const x = Math.max(0, Math.min((e.clientX - rpRect.left) / stageScale - ox, rp.offsetWidth  - panel.offsetWidth));
+    const y = Math.max(0, Math.min((e.clientY - rpRect.top)  / stageScale - oy, rp.offsetHeight - panel.offsetHeight - 40));
     panel.style.left = x + 'px';
     panel.style.top  = y + 'px';
   });
@@ -894,16 +894,17 @@ initScreensaver();
 // ─── Stage Scaling (uniform fit, letterbox) ────────────────
 const STAGE_W = window.screen.availWidth  || window.innerWidth;
 const STAGE_H = window.screen.availHeight || window.innerHeight;
+let stageScale = 1;
 (function initStage() {
   const stage = document.getElementById('stage');
   if (!stage) return;
   stage.style.width  = STAGE_W + 'px';
   stage.style.height = STAGE_H + 'px';
   function apply() {
-    const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
-    const offX = (window.innerWidth  - STAGE_W * scale) / 2;
-    const offY = (window.innerHeight - STAGE_H * scale) / 2;
-    stage.style.transform = `translate(${offX}px, ${offY}px) scale(${scale})`;
+    stageScale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+    const offX = (window.innerWidth  - STAGE_W * stageScale) / 2;
+    const offY = (window.innerHeight - STAGE_H * stageScale) / 2;
+    stage.style.transform = `translate(${offX}px, ${offY}px) scale(${stageScale})`;
   }
   window.addEventListener('resize', apply);
   apply();
