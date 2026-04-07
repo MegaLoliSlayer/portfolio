@@ -67,24 +67,16 @@
 html, body {
   width: 100%;
   height: 100%;
-  background: #000;
+  background: var(--bg);
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
   overflow: hidden;
   animation: cursor-normal 800ms steps(1) infinite;
 }
 
-#stage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: top left;
-  background: var(--bg);
-}
-
 /* ─── Screens ────────────────────────────────────── */
 .screen {
-  position: absolute;
+  position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
@@ -186,7 +178,7 @@ html, body {
 
 /* ─── Right Panel ────────────────────────────────── */
 #right-panel {
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
@@ -353,17 +345,17 @@ html, body {
 
 /* ─── Lain Side Character ────────────────────────── */
 #lain-side {
-  position: absolute;
+  position: fixed;
   left: 0;
   top: 0;
-  height: 100%;
+  height: 100vh;
   z-index: 9;
   pointer-events: none;
 }
 
 #lain8 {
   display: block;
-  height: 100%;
+  height: 100vh;
   width: auto;
   pointer-events: auto;
   animation: cursor-pointer 800ms steps(1) infinite;
@@ -374,14 +366,14 @@ html, body {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  height: 22%;
+  height: 22vh;
   width: auto;
   pointer-events: none;
 }
 
 #lain-bubble {
   position: absolute;
-  bottom: calc(22% + 14px);
+  bottom: calc(22vh + 14px);
   left: 50%;
   max-width: 220px;
   background: rgba(5, 5, 15, 0.92);
