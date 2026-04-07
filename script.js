@@ -535,10 +535,74 @@ function toggleAboutPanel() {
   if (panel.classList.contains('visible')) {
     panel.classList.remove('visible');
   } else {
+    panel.style.cssText = '';
+    delete panel.dataset.savedWidth;
+    delete panel.dataset.savedHeight;
+    panel.classList.remove('minimized');
     panel.classList.add('visible');
     bringToFront(panel);
   }
   updateTaskbar();
+}
+
+function closeAboutPanel() {
+  document.getElementById('about-panel').classList.remove('visible');
+  updateTaskbar();
+}
+
+function minimizeAboutPanel() {
+  const panel = document.getElementById('about-panel');
+  if (panel.classList.contains('minimized')) return;
+  panel.dataset.savedWidth  = panel.offsetWidth  + 'px';
+  panel.dataset.savedHeight = panel.offsetHeight + 'px';
+  panel.style.width  = panel.offsetWidth + 'px';
+  panel.style.height = panel.querySelector('.about-titlebar').offsetHeight + 'px';
+  panel.classList.add('minimized');
+}
+
+function expandAboutPanel() {
+  const panel = document.getElementById('about-panel');
+  panel.classList.remove('minimized');
+  panel.style.width  = panel.dataset.savedWidth  || '';
+  panel.style.height = panel.dataset.savedHeight || '';
+}
+
+function initAboutPanel() {
+  const panel = document.getElementById('about-panel');
+  panel.addEventListener('mousedown', () => bringToFront(panel));
+
+  const titlebar = panel.querySelector('.about-titlebar');
+  let dragging = false, ox = 0, oy = 0;
+
+  titlebar.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('about-dot')) return;
+    dragging = true;
+    const rect   = panel.getBoundingClientRect();
+    const rpRect = getRightPanel().getBoundingClientRect();
+    panel.style.right = 'auto';
+    panel.style.top   = (rect.top  - rpRect.top)  / stageScale + 'px';
+    panel.style.left  = (rect.left - rpRect.left) / stageScale + 'px';
+    ox = (e.clientX - rect.left) / stageScale;
+    oy = (e.clientY - rect.top)  / stageScale;
+    panel.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const rp = getRightPanel();
+    const rpRect = rp.getBoundingClientRect();
+    const x = Math.max(0, Math.min((e.clientX - rpRect.left) / stageScale - ox, rp.offsetWidth  - panel.offsetWidth));
+    const y = Math.max(0, Math.min((e.clientY - rpRect.top)  / stageScale - oy, rp.offsetHeight - panel.offsetHeight - 40));
+    panel.style.left = x + 'px';
+    panel.style.top  = y + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    panel.classList.remove('dragging');
+  });
 }
 
 function switchAboutLang(lang) {
@@ -808,6 +872,13 @@ async function runTerminalSequence() {
   tvPanel.classList.add('visible');
   setTimeout(() => tvPanel.classList.remove('tv-first-show'), 700);
 
+  // Show About panel by default with zoom animation
+  await wait(150);
+  const aboutPanel = document.getElementById('about-panel');
+  aboutPanel.classList.add('about-first-show');
+  aboutPanel.classList.add('visible');
+  setTimeout(() => aboutPanel.classList.remove('about-first-show'), 700);
+
   updateTaskbar();
 
   // Connections sidebar opens by default
@@ -826,6 +897,7 @@ async function runTerminalSequence() {
         !e.target.closest('#bg-picker') &&
         !e.target.closest('#music-panel') &&
         !e.target.closest('#tv-panel') &&
+        !e.target.closest('#about-panel') &&
         !e.target.closest('#taskbar')) {
       input.focus();
     }
@@ -991,6 +1063,7 @@ runBootSequence().catch(console.error);
 initMusicDrag();
 initLainSide();
 initTvPanel();
+initAboutPanel();
 initTerminalDrag();
 initConnectionsSidebar();
 initBgPicker();
@@ -1055,6 +1128,7 @@ window.addEventListener('resize', () => {
     document.getElementById('music-panel'),
     document.getElementById('tv-panel'),
     document.getElementById('bg-picker'),
+    document.getElementById('about-panel'),
   ];
   panels.forEach(el => {
     if (!el || !el.style.left) return;

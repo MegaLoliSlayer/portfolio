@@ -212,10 +212,10 @@ html, body {
   backdrop-filter: blur(8px);
   overflow: hidden;
   resize: both;
-  /* Initial centered position — JS will take over on first drag */
-  top: 50%;
+  /* Initial top-center position — JS will take over on first drag */
+  top: 30px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 }
 
 .terminal-window.visible {
@@ -943,33 +943,62 @@ html, body {
 /* ─── About Panel ────────────────────────────── */
 #about-panel {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(560px, 92%);
-  max-height: 78%;
-  z-index: 22;
-  background: var(--terminal-bg);
-  border: 1px solid #00ffcc44;
-  border-radius: 8px;
-  box-shadow: var(--glow);
-  backdrop-filter: blur(8px);
-  display: none;
+  top: 60px;
+  left: 40px;
+  z-index: 13;
+  width: 440px;
+  height: 520px;
+  min-width: 260px;
+  min-height: 48px;
+  max-width: calc(100% - 48px);
+  max-height: calc(100% - 40px - 48px);
+  background: #080810;
+  border: 3px solid #1a1a2e;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px #00ffcc22, 0 0 24px rgba(0,0,0,0.9),
+              inset 0 0 12px rgba(0,0,0,0.6);
+  display: flex;
   flex-direction: column;
   overflow: hidden;
+  resize: both;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
-#about-panel.visible { display: flex; }
+#about-panel.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#about-panel.minimized .about-tabs,
+#about-panel.minimized .about-body {
+  display: none;
+}
+
+#about-panel.about-first-show {
+  animation: music-zoomout 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+#about-panel.dragging .about-titlebar {
+  animation: cursor-drag 800ms steps(1) infinite;
+}
 
 .about-titlebar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 14px;
-  background: rgba(0, 255, 204, 0.06);
-  border-bottom: 1px solid #00ffcc33;
+  gap: 6px;
+  padding: 9px 12px;
+  background: rgba(0,255,204,0.04);
+  border-bottom: 1px solid #1a1a2e;
+  border-radius: 11px 11px 0 0;
   user-select: none;
   animation: cursor-drag 800ms steps(1) infinite;
+}
+
+.about-body {
+  flex: 1;
+  min-height: 0;
 }
 
 .about-title {
