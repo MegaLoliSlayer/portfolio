@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SADAME@WIRED</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Animated cursor preloads -->
+  <link rel="preload" as="image" href="normal%20select/pixil-frame-0.png" />
+  <link rel="preload" as="image" href="normal%20select/pixil-frame-1.png" />
+  <link rel="preload" as="image" href="normal%20select/pixil-frame-2.png" />
+  <link rel="preload" as="image" href="normal%20select/pixil-frame-3.png" />
+  <link rel="preload" as="image" href="normal%20select/pixil-frame-4.png" />
+  <link rel="preload" as="image" href="normal%20select/pixil-frame-5.png" />
+  <link rel="preload" as="image" href="normal%20select/pixil-frame-6.png" />
+  <link rel="preload" as="image" href="normal%20select/pixil-frame-7.png" />
+  <link rel="preload" as="image" href="link%20select/pixil-frame-0.png" />
+  <link rel="preload" as="image" href="link%20select/pixil-frame-1.png" />
+  <link rel="preload" as="image" href="link%20select/pixil-frame-2.png" />
+  <link rel="preload" as="image" href="link%20select/pixil-frame-3.png" />
+  <link rel="preload" as="image" href="link%20select/pixil-frame-4.png" />
+  <link rel="preload" as="image" href="link%20select/pixil-frame-5.png" />
+  <link rel="preload" as="image" href="link%20select/pixil-frame-6.png" />
+  <link rel="preload" as="image" href="link%20select/pixil-frame-7.png" />
+  <link rel="preload" as="image" href="type%20select/pixil-frame-0.png" />
+  <link rel="preload" as="image" href="type%20select/pixil-frame-1.png" />
+  <link rel="preload" as="image" href="type%20select/pixil-frame-2.png" />
+  <link rel="preload" as="image" href="type%20select/pixil-frame-3.png" />
+  <link rel="preload" as="image" href="type%20select/pixil-frame-4.png" />
+  <link rel="preload" as="image" href="type%20select/pixil-frame-5.png" />
+  <link rel="preload" as="image" href="type%20select/pixil-frame-6.png" />
+  <link rel="preload" as="image" href="type%20select/pixil-frame-7.png" />
+  <link rel="preload" as="image" href="drag%20select/pixil-frame-0.png" />
+  <link rel="preload" as="image" href="drag%20select/pixil-frame-1.png" />
+  <link rel="preload" as="image" href="drag%20select/pixil-frame-2.png" />
+  <link rel="preload" as="image" href="drag%20select/pixil-frame-3.png" />
+  <link rel="preload" as="image" href="drag%20select/pixil-frame-4.png" />
+  <link rel="preload" as="image" href="drag%20select/pixil-frame-5.png" />
+  <link rel="preload" as="image" href="drag%20select/pixil-frame-6.png" />
+  <link rel="preload" as="image" href="drag%20select/pixil-frame-7.png" />
+</head>
+<body>
+
+  <!-- SCREEN 1: Boot Sequence -->
+  <div id="screen1" class="screen active">
+    <div id="bg-image" class="bg-image"></div>
+    <div class="overlay"></div>
+    <div id="boot-text" class="boot-text"></div>
+  </div>
+
+  <!-- SCREEN 2: Terminal Hub -->
+  <div id="screen2" class="screen">
+
+    <!-- Left panel: Lain character (unchanged) -->
+    <div id="lain-side">
+      <img id="lain8" src="lain8.gif" alt="Lain" />
+      <img id="lain28" src="lain28.gif" alt="" />
+      <div id="lain-bubble">
+        <p id="lain-bubble-text"></p>
+      </div>
+    </div>
+
+    <!-- Right panel: desktop environment -->
+    <div id="right-panel">
+
+      <!-- Background layers -->
+      <div class="bg-image"></div>
+      <img id="right-bg" src="lain3.gif" alt="" />
+      <div class="overlay"></div>
+      <div class="scanlines"></div>
+
+      <!-- Connections sidebar -->
+      <div id="connections-sidebar">
+        <div class="conn-titlebar">
+          <span class="conn-title">SADAME@WIRED:~/connections</span>
+          <span class="conn-close" onclick="toggleConnectionsSidebar()">&#10005;</span>
+        </div>
+        <div class="conn-body" id="conn-body"></div>
+      </div>
+
+      <!-- Terminal window -->
+      <div class="terminal-window">
+        <div class="terminal-titlebar">
+          <span class="dot dot-red terminal-dot" onclick="closeTerminal()" title="Close">&#10005;</span>
+          <span class="dot dot-yellow terminal-dot" onclick="minimizeTerminal()" title="Minimize">&#8722;</span>
+          <span class="dot dot-green terminal-dot" onclick="restoreTerminal()" title="Restore">&#43;</span>
+          <span class="terminal-title">SADAME@WIRED:~</span>
+        </div>
+        <div class="terminal-body">
+          <div id="terminal-output"></div>
+          <div id="input-line" class="terminal-input-line">
+            <span class="prompt">SADAME@WIRED:~$ </span>
+            <input type="text" id="terminal-input" spellcheck="false" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+
+      <!-- TV Panel -->
+      <div id="tv-panel">
+        <div class="tv-titlebar">
+          <span class="dot dot-red tv-dot" onclick="closeTvPanel()" title="Close">&#10005;</span>
+          <span class="dot dot-yellow tv-dot" onclick="toggleTvMinimize()" title="Minimize">&#8722;</span>
+          <span class="dot dot-green tv-dot" onclick="expandTvPanel()" title="Restore">&#43;</span>
+          <span class="tv-title">WIRED://TV</span>
+        </div>
+        <div class="tv-content">
+          <div class="tv-screen">
+            <img id="tv-img" src="" alt="" />
+            <div class="tv-scanlines"></div>
+          </div>
+          <div class="tv-controls">
+            <button class="tv-btn" onclick="tvPrev()">[prev]</button>
+            <span id="tv-channel">CH 01</span>
+            <button class="tv-btn" onclick="tvNext()">[next]</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Music Panel -->
+      <div id="music-panel">
+        <div class="music-titlebar">
+          <span class="dot dot-red music-dot" onclick="toggleMusicPanel()" title="Close">&#10005;</span>
+          <span class="dot dot-yellow music-dot" onclick="toggleMusicMinimize()" title="Minimize">&#8722;</span>
+          <span class="dot dot-green music-dot" onclick="expandMusicPanel()" title="Restore">&#43;</span>
+          <div class="music-title-wrap">
+            <span class="music-title-mini">SADAME@WIRED:~/music</span>
+          </div>
+        </div>
+        <div class="music-content">
+          <div id="embed-iframe">
+            <iframe
+              src="https://open.spotify.com/embed/playlist/4MWZmsObrlhg0dBGmSu1b6?utm_source=generator"
+              allowfullscreen
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy">
+            </iframe>
+          </div>
+          <div class="music-buttons">
+            <button type="button" class="music-btn" aria-label="Toggle playlist view" onclick="toggleMusicPlaylist()">[playlist]</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Background Picker -->
+      <div id="bg-picker">
+        <div class="picker-titlebar">
+          <span class="picker-title">WIRED://background</span>
+          <span class="picker-close" onclick="toggleBgPicker()">&#10005;</span>
+        </div>
+        <div class="picker-grid" id="picker-grid"></div>
+      </div>
+
+      <!-- Taskbar -->
+      <div id="taskbar">
+        <div id="taskbar-buttons">
+          <button class="tb-btn" id="tb-terminal"    onclick="taskbarToggleTerminal()">&#62;_ terminal</button>
+          <button class="tb-btn" id="tb-connections" onclick="toggleConnectionsSidebar()">⠿ connections</button>
+          <button class="tb-btn" id="tb-music"       onclick="toggleMusicPanel()">♪ music</button>
+          <button class="tb-btn" id="tb-tv"          onclick="taskbarToggleTv()">⊞ tv</button>
+          <button class="tb-btn" id="tb-background"  onclick="toggleBgPicker()">◈ background</button>
+        </div>
+        <span class="tb-label">SADAME@WIRED</span>
+        <div id="power-wrap">
+          <div id="power-menu">
+            <button class="power-opt" onclick="powerSleep()">⏾ sleep</button>
+            <button class="power-opt" onclick="powerShutdown()">⏻ shut down</button>
+          </div>
+          <button class="tb-btn" id="tb-power" onclick="togglePowerMenu(event)" title="Power">⏻</button>
+        </div>
+      </div>
+
+    </div><!-- /#right-panel -->
+  </div><!-- /#screen2 -->
+
+  <canvas id="screensaver"></canvas>
+  <div id="screensaver-hint">// you are disconnected from the wired //<br>press any key to return</div>
+  <script src="script.js"></script>
+</body>
+</html>
