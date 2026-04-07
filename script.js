@@ -68,7 +68,6 @@ function taskbarToggleTerminal() {
   if (win.classList.contains('visible')) {
     win.classList.remove('visible');
   } else {
-    win.style.cssText = '';
     win.classList.add('visible');
     const out = getOutput();
     out.textContent = '';
@@ -297,9 +296,6 @@ function taskbarToggleTv() {
   if (wasVisible) {
     panel.classList.remove('visible');
   } else {
-    panel.style.cssText = '';
-    delete panel.dataset.savedWidth;
-    delete panel.dataset.savedHeight;
     panel.classList.add('visible');
   }
   updateTaskbar();
@@ -526,7 +522,6 @@ function toggleMusicPanel() {
   if (panel.classList.contains('visible')) {
     panel.classList.remove('visible');
   } else {
-    panel.style.cssText = '';
     panel.classList.add('visible');
   }
   updateTaskbar();
@@ -537,10 +532,6 @@ function toggleAboutPanel() {
   if (panel.classList.contains('visible')) {
     panel.classList.remove('visible');
   } else {
-    panel.style.cssText = '';
-    delete panel.dataset.savedWidth;
-    delete panel.dataset.savedHeight;
-    panel.classList.remove('minimized');
     panel.classList.add('visible');
     bringToFront(panel);
   }
@@ -782,9 +773,6 @@ async function handleCommand(raw) {
     if (wasVisible) {
       panel.classList.remove('visible');
     } else {
-      panel.style.cssText = '';
-      delete panel.dataset.savedWidth;
-      delete panel.dataset.savedHeight;
       panel.classList.add('visible');
     }
     updateTaskbar();
