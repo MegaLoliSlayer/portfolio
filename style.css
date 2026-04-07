@@ -352,17 +352,17 @@ html, body {
 
 /* ─── Lain Side Character ────────────────────────── */
 #lain-side {
-  position: fixed;
+  position: absolute;
   left: 0;
   top: 0;
-  height: 100vh;
+  height: 100%;
   z-index: 9;
   pointer-events: none;
 }
 
 #lain8 {
   display: block;
-  height: 100vh;
+  height: 100%;
   width: auto;
   pointer-events: auto;
   animation: cursor-pointer 800ms steps(1) infinite;
@@ -373,7 +373,7 @@ html, body {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  height: 22vh;
+  height: 22%;
   width: auto;
   pointer-events: none;
 }
