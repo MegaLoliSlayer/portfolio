@@ -891,23 +891,6 @@ initConnectionsSidebar();
 initBgPicker();
 initScreensaver();
 
-// ─── Stage Scaling (stretch like an image) ─────────────────
-const STAGE_W = window.innerWidth;
-const STAGE_H = window.innerHeight;
-(function initStage() {
-  const stage = document.getElementById('stage');
-  if (!stage) return;
-  stage.style.width  = STAGE_W + 'px';
-  stage.style.height = STAGE_H + 'px';
-  function apply() {
-    const sx = window.innerWidth  / STAGE_W;
-    const sy = window.innerHeight / STAGE_H;
-    stage.style.transform = `scale(${sx}, ${sy})`;
-  }
-  window.addEventListener('resize', apply);
-  apply();
-})();
-
 // ─── Power Menu ──────────────────────────────────────────────
 function togglePowerMenu(e) {
   if (e) e.stopPropagation();
