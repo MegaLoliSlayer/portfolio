@@ -690,10 +690,53 @@ async function runBootSequence() {
   await wait(300);
 
   screen1.classList.add('glitch-intensify');
-  await wait(350);
+  await wait(250);
   screen1.classList.remove('active');
-  await wait(100);
+  document.getElementById('screen2').classList.add('active');
+  await matrixWipe();
   runTerminalSequence();
+}
+
+// Matrix-rain wipe transition revealing screen2 from top to bottom
+function matrixWipe(duration = 1400) {
+  return new Promise(resolve => {
+    const cvs = document.createElement('canvas');
+    cvs.style.cssText = 'position:fixed;top:0;left:0;z-index:100000;pointer-events:none;';
+    const W = cvs.width  = window.innerWidth;
+    const H = cvs.height = window.innerHeight;
+    cvs.style.width = W + 'px';
+    cvs.style.height = H + 'px';
+    document.body.appendChild(cvs);
+    const ctx = cvs.getContext('2d');
+    const colW = 16;
+    const cols = Math.ceil(W / colW);
+    const chars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎ01';
+    const drops = new Array(cols).fill(0).map(() => Math.random() * -30);
+    ctx.font = '16px monospace';
+    ctx.textBaseline = 'top';
+    const start = performance.now();
+    function frame(t) {
+      const p = Math.min(1, (t - start) / duration);
+      const wipeY = p * H;
+      // Clear the revealed (upper) area every frame so screen2 shows through
+      ctx.clearRect(0, 0, W, wipeY);
+      // Fade trail only in the still-covered (lower) area
+      ctx.fillStyle = 'rgba(0,0,0,0.10)';
+      ctx.fillRect(0, wipeY, W, H - wipeY);
+      for (let i = 0; i < cols; i++) {
+        const y = drops[i] * 16;
+        if (y >= wipeY && y < H) {
+          ctx.fillStyle = Math.random() < 0.1 ? '#aaffee' : '#00ffcc';
+          ctx.fillText(chars.charAt((Math.random() * chars.length) | 0), i * colW, y);
+        }
+        drops[i] += 1.4;
+        if (drops[i] * 16 > H && Math.random() > 0.975) drops[i] = 0;
+      }
+      if (p < 1) requestAnimationFrame(frame);
+      else { cvs.remove(); resolve(); }
+    }
+    requestAnimationFrame(frame);
+  });
 }
 
 // ─── Screen 2: Interactive Terminal ──────────────────────────
