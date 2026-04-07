@@ -74,9 +74,16 @@ html, body {
   animation: cursor-normal 800ms steps(1) infinite;
 }
 
+#stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+}
+
 /* ─── Screens ────────────────────────────────────── */
 .screen {
-  position: fixed;
+  position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
