@@ -213,9 +213,9 @@ html, body {
   overflow: hidden;
   resize: both;
   /* Initial centered position — JS will take over on first drag */
-  top: 60px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 }
 
 .terminal-window.visible {

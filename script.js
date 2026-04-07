@@ -129,6 +129,9 @@ function initLainSide() {
   const lain8      = document.getElementById('lain8');
   lain8.addEventListener('load', updateLainWidth);
   updateLainWidth(); // in case already loaded (cached)
+  // Retry a few times in case the image decodes after first layout pass
+  [50, 150, 400, 900].forEach(ms => setTimeout(updateLainWidth, ms));
+  if (lain8.decode) lain8.decode().then(updateLainWidth).catch(() => {});
   const bubble     = document.getElementById('lain-bubble');
   const bubbleText = document.getElementById('lain-bubble-text');
 
