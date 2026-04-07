@@ -231,32 +231,31 @@ html, body {
 }
 
 .dot {
-  width: 28px;
+  width: 22px;
   height: 18px;
-  border-radius: 0;
   flex-shrink: 0;
   background: transparent;
-  border: 1px solid #00ffcc44;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  font-weight: 400;
-  color: #00ffccaa;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
   line-height: 1;
   animation: cursor-pointer 800ms steps(1) infinite;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition: color 0.12s, text-shadow 0.12s, transform 0.12s;
 }
 .dot:hover {
-  background: rgba(0, 255, 204, 0.15);
-  color: var(--accent);
-  border-color: var(--accent);
+  color: #ffffff;
+  text-shadow: 0 0 10px var(--accent), 0 0 18px var(--accent);
+  transform: scale(1.15);
 }
 .dot-red:hover {
-  background: #e81123;
-  color: #fff;
-  border-color: #e81123;
+  color: #ff003c;
+  text-shadow: 0 0 10px #ff003c, 0 0 18px #ff003c;
 }
 .terminal-dot,
 .terminal-dot:hover { filter: none; }
