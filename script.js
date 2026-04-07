@@ -901,12 +901,10 @@ function closePowerMenu() {
 }
 function powerSleep() {
   closePowerMenu();
-  setTimeout(() => {
-    manualSleep = true;
-    if (screensaverTimer) { clearTimeout(screensaverTimer); screensaverTimer = null; }
-    showScreensaver();
-    document.getElementById('screensaver-hint').classList.add('visible');
-  }, 50);
+  manualSleep = true;
+  if (screensaverTimer) { clearTimeout(screensaverTimer); screensaverTimer = null; }
+  showScreensaver();
+  document.getElementById('screensaver-hint').classList.add('visible');
 }
 function powerShutdown() {
   closePowerMenu();
