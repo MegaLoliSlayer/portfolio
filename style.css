@@ -950,4 +950,27 @@ html, body {
   pointer-events: auto;
 }
 
+#screensaver-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1rem;
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent), 0 0 18px var(--accent);
+  text-align: center;
+  letter-spacing: 0.1em;
+  line-height: 1.8;
+  z-index: 100000;
+  pointer-events: none;
+  display: none;
+  animation: hint-pulse 2s ease-in-out infinite;
+}
+#screensaver-hint.visible { display: block; }
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
 .wired-msg { color: #00ffcc; opacity: 0.55; font-style: italic; margin: 2px 0; }

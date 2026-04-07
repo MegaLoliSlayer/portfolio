@@ -854,6 +854,8 @@ function hideScreensaver() {
   screensaverActive = false;
   if (screensaverFrame) { clearTimeout(screensaverFrame); screensaverFrame = null; }
   if (ssCanvas) ssCanvas.classList.remove('active');
+  const hint = document.getElementById('screensaver-hint');
+  if (hint) hint.classList.remove('visible');
 }
 
 function resetIdleTimer() {
@@ -890,8 +892,13 @@ function closePowerMenu() {
 }
 function powerSleep() {
   closePowerMenu();
-  if (screensaverActive) hideScreensaver();
-  else showScreensaver();
+  if (screensaverActive) {
+    hideScreensaver();
+    document.getElementById('screensaver-hint').classList.remove('visible');
+  } else {
+    showScreensaver();
+    document.getElementById('screensaver-hint').classList.add('visible');
+  }
 }
 function powerShutdown() {
   closePowerMenu();
