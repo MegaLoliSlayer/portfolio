@@ -185,6 +185,7 @@ function initConnectionsSidebar() {
 function toggleConnectionsSidebar() {
   const sidebar = document.getElementById('connections-sidebar');
   sidebar.classList.toggle('visible');
+  if (sidebar.classList.contains('visible')) bringToFront(sidebar);
   updateTaskbar();
 }
 
