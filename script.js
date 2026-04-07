@@ -801,11 +801,18 @@ let ssCanvas, ssCtx, ssColumns;
 
 function ssResize() {
   if (!ssCanvas) return;
-  const downscale = isMobile ? 0.5 : 1;
-  ssCanvas.width  = Math.floor(window.innerWidth  * downscale);
-  ssCanvas.height = Math.floor(window.innerHeight * downscale);
-  ssCanvas.style.width  = window.innerWidth  + 'px';
-  ssCanvas.style.height = window.innerHeight + 'px';
+  if (isMobile) {
+    const downscale = 0.5;
+    ssCanvas.width  = Math.floor(STAGE_W * downscale);
+    ssCanvas.height = Math.floor(STAGE_H * downscale);
+    ssCanvas.style.width  = STAGE_W + 'px';
+    ssCanvas.style.height = STAGE_H + 'px';
+  } else {
+    ssCanvas.width  = window.innerWidth;
+    ssCanvas.height = window.innerHeight;
+    ssCanvas.style.width  = '';
+    ssCanvas.style.height = '';
+  }
   const colWidth = 16;
   const cols = Math.ceil(ssCanvas.width / colWidth);
   ssColumns = [];
