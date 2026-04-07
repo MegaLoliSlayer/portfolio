@@ -727,6 +727,9 @@ async function runTerminalSequence() {
   // Connections sidebar opens by default
   toggleConnectionsSidebar();
 
+  // Make terminal the topmost window after all other panels are shown
+  bringToFront(document.querySelector('.terminal-window'));
+
   // Show interactive prompt and wire up Enter key
   showPrompt();
 
@@ -877,13 +880,15 @@ function initScreensaver() {
   ['mousemove', 'keydown', 'click', 'touchstart'].forEach(ev => {
     document.addEventListener(ev, resetIdleTimer);
   });
-  document.addEventListener('keydown', () => {
+  const wakeFromManual = () => {
     if (manualSleep) {
       manualSleep = false;
       hideScreensaver();
       resetIdleTimer();
     }
-  });
+  };
+  document.addEventListener('keydown', wakeFromManual);
+  document.addEventListener('touchstart', wakeFromManual, { passive: true });
   window.addEventListener('resize', () => { if (screensaverActive) ssResize(); });
   resetIdleTimer();
 }
@@ -916,6 +921,7 @@ let stageScale = 1;
     stage.style.transform = `translate(${offX}px, ${offY}px) scale(${stageScale})`;
   }
   if (!isMobile) window.addEventListener('resize', apply);
+  else window.addEventListener('orientationchange', () => setTimeout(apply, 150));
   apply();
 })();
 
