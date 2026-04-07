@@ -185,6 +185,22 @@ function initConnectionsSidebar() {
 
   // Focus management
   sidebar.addEventListener('mousedown', () => bringToFront(sidebar));
+
+  // Append ASCII Lain art at the bottom
+  fetch('lain.txt')
+    .then(r => r.ok ? r.text() : '')
+    .then(txt => {
+      if (!txt) return;
+      const art = document.createElement('pre');
+      art.className = 'conn-ascii';
+      art.textContent = txt;
+      const caption = document.createElement('div');
+      caption.className = 'conn-ascii-caption';
+      caption.textContent = '// present day //  // present time //';
+      body.appendChild(art);
+      body.appendChild(caption);
+    })
+    .catch(() => {});
 }
 
 function toggleConnectionsSidebar() {

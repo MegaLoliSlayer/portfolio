@@ -862,6 +862,36 @@ html, body {
   flex: 1;
   overflow-y: auto;
   padding: 12px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #00ffcc44 transparent;
+}
+.conn-body::-webkit-scrollbar { width: 6px; }
+.conn-body::-webkit-scrollbar-thumb { background: #00ffcc44; border-radius: 3px; }
+
+.conn-ascii {
+  margin: 20px 0 4px;
+  padding: 10px 6px 6px;
+  border-top: 1px dashed #00ffcc33;
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 7px;
+  line-height: 7px;
+  letter-spacing: 0;
+  text-align: center;
+  white-space: pre;
+  text-shadow: 0 0 4px #00ffcc88, 0 0 10px #00ffcc44;
+  opacity: 0.85;
+  user-select: none;
+  overflow: hidden;
+}
+
+.conn-ascii-caption {
+  text-align: center;
+  font-size: 0.62rem;
+  color: #00ffcc77;
+  letter-spacing: 0.12em;
+  padding: 2px 0 14px;
+  text-shadow: 0 0 6px #00ffcc55;
 }
 
 .conn-link {
