@@ -223,6 +223,37 @@
         </div>
       </div>
 
+      <!-- Sys-monitor Panel -->
+      <div id="sysmon-panel">
+        <div class="sysmon-titlebar">
+          <span class="dot dot-red sysmon-dot"    onclick="closeSysmon()"    title="Close">&#10005;</span>
+          <span class="dot dot-yellow sysmon-dot" onclick="minimizeSysmon()" title="Minimize">&#8722;</span>
+          <span class="dot dot-green sysmon-dot"  onclick="restoreSysmon()"  title="Restore">&#43;</span>
+          <span class="sysmon-title">SADAME@WIRED:~/sysmon</span>
+        </div>
+        <div class="sysmon-body">
+          <div class="sysmon-sidebar" id="sysmon-sidebar"></div>
+          <div class="sysmon-main">
+            <div class="sysmon-chart-wrap">
+              <div class="sysmon-chart-header">
+                <span id="sysmon-chart-label">Frame Rate / fps</span>
+                <span id="sysmon-chart-window">60 s window · 10 Hz</span>
+              </div>
+              <canvas id="sysmon-canvas"></canvas>
+              <div class="sysmon-chart-footer">
+                <span>cur <b id="sysmon-cur">—</b></span>
+                <span>min <b id="sysmon-min">—</b></span>
+                <span>max <b id="sysmon-max">—</b></span>
+              </div>
+            </div>
+            <div class="sysmon-proc-wrap">
+              <div class="sysmon-proc-header">// processes</div>
+              <div class="sysmon-proc-table" id="sysmon-proc-table"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Taskbar -->
       <div id="taskbar">
         <div id="taskbar-buttons">
@@ -232,6 +263,7 @@
           <button class="tb-btn" id="tb-tv"          onclick="taskbarToggleTv()">⊞ tv</button>
           <button class="tb-btn" id="tb-background"  onclick="toggleBgPicker()">◈ background</button>
           <button class="tb-btn" id="tb-about"       onclick="toggleAboutPanel()">☻ about</button>
+          <button class="tb-btn" id="tb-sysmon"      onclick="taskbarToggleSysmon()">◉ sysmon</button>
         </div>
         <span class="tb-label">SADAME@WIRED</span>
         <div id="power-wrap">
