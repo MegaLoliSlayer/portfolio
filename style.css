@@ -1198,3 +1198,146 @@ html, body {
 }
 
 .wired-msg { color: #00ffcc; opacity: 0.55; font-style: italic; margin: 2px 0; }
+
+/* ─── Sys-monitor ─────────────────────────────────────── */
+#sysmon-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 720px;
+  height: 420px;
+  min-width: 520px;
+  min-height: 320px;
+  background: rgba(4, 10, 6, 0.92);
+  border: 1px solid var(--accent, #0f0);
+  box-shadow: 0 0 24px rgba(0, 255, 100, 0.15);
+  display: none;
+  flex-direction: column;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text, #c0ffd0);
+  z-index: 30;
+}
+#sysmon-panel.visible { display: flex; }
+#sysmon-panel.dragging { transition: none; user-select: none; }
+
+.sysmon-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(0, 40, 10, 0.7);
+  border-bottom: 1px solid var(--accent, #0f0);
+  cursor: move;
+  font-size: 11px;
+}
+.sysmon-title {
+  margin-left: auto;
+  opacity: 0.75;
+  letter-spacing: 0.5px;
+}
+
+.sysmon-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.sysmon-sidebar {
+  width: 36%;
+  min-width: 200px;
+  padding: 6px;
+  border-right: 1px solid rgba(0, 255, 100, 0.25);
+  overflow-y: auto;
+  font-size: 11px;
+}
+
+.sysmon-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sysmon-chart-wrap {
+  flex: 1 1 70%;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  min-height: 0;
+}
+.sysmon-chart-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+#sysmon-canvas {
+  flex: 1;
+  width: 100%;
+  background: repeating-linear-gradient(0deg, rgba(0,255,100,0.04) 0 1px, transparent 1px 40px);
+  border: 1px solid rgba(0, 255, 100, 0.2);
+}
+.sysmon-chart-footer {
+  display: flex;
+  gap: 16px;
+  margin-top: 4px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+.sysmon-chart-footer b { color: var(--accent, #0f0); font-weight: normal; }
+
+.sysmon-proc-wrap {
+  flex: 0 0 30%;
+  min-height: 110px;
+  max-height: 40%;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(0, 255, 100, 0.25);
+  padding: 4px 8px;
+}
+.sysmon-proc-header { font-size: 10px; opacity: 0.55; margin-bottom: 2px; }
+.sysmon-proc-table {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  white-space: pre;
+}
+
+.sysmon-section-header {
+  font-size: 10px;
+  opacity: 0.55;
+  margin: 6px 2px 2px 2px;
+  letter-spacing: 0.5px;
+}
+.sysmon-section-header:first-child { margin-top: 0; }
+
+.sysmon-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  grid-column-gap: 6px;
+  padding: 3px 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.sysmon-row:hover { background: rgba(0, 255, 100, 0.05); }
+.sysmon-row.selected {
+  border-color: var(--accent, #0f0);
+  background: rgba(0, 255, 100, 0.08);
+}
+.sysmon-row.static { cursor: default; }
+.sysmon-row.static:hover { background: transparent; }
+
+.sysmon-row-label { opacity: 0.7; font-size: 10px; }
+.sysmon-row-value { text-align: right; font-variant-numeric: tabular-nums; }
+.sysmon-row-spark { grid-column: 1 / -1; height: 16px; width: 100%; }
+.sysmon-row-spark polyline { fill: none; stroke: var(--accent, #0f0); stroke-width: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  #sysmon-canvas { image-rendering: pixelated; }
+}
