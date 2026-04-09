@@ -52,6 +52,7 @@ function updateTaskbar() {
     'tb-tv':          document.getElementById('tv-panel').classList.contains('visible'),
     'tb-background':  document.getElementById('bg-picker').classList.contains('visible'),
     'tb-about':       document.getElementById('about-panel').classList.contains('visible'),
+    'tb-sysmon':      document.getElementById('sysmon-panel').classList.contains('visible'),
   };
   Object.entries(states).forEach(([id, active]) => {
     document.getElementById(id).classList.toggle('active', active);
@@ -1146,3 +1147,616 @@ window.addEventListener('resize', () => {
   });
 });
 
+
+// ─── Sys-monitor ───────────────────────────────────────────────
+const SYSMON_HZ = 10;
+const SYSMON_WINDOW_S = 60;
+const SYSMON_MAX_SAMPLES = SYSMON_HZ * SYSMON_WINDOW_S;
+
+function sysmonRing() {
+  return { buf: new Float32Array(SYSMON_MAX_SAMPLES), head: 0, filled: 0 };
+}
+function sysmonPush(ring, v) {
+  ring.buf[ring.head] = v;
+  ring.head = (ring.head + 1) % SYSMON_MAX_SAMPLES;
+  if (ring.filled < SYSMON_MAX_SAMPLES) ring.filled++;
+}
+function sysmonLast(ring) {
+  if (ring.filled === 0) return NaN;
+  var idx = (ring.head - 1 + SYSMON_MAX_SAMPLES) % SYSMON_MAX_SAMPLES;
+  return ring.buf[idx];
+}
+function sysmonMinMax(ring) {
+  var lo = Infinity, hi = -Infinity;
+  for (var i = 0; i < ring.filled; i++) {
+    var v = ring.buf[i];
+    if (!Number.isFinite(v)) continue;
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  if (!Number.isFinite(lo)) return [NaN, NaN];
+  return [lo, hi];
+}
+
+var sysmonState = {
+  isOpen: false,
+  rafId: null,
+  intervalId: null,
+  lastFrameT: 0,
+  fpsEMA: 60,
+  selectedId: "fps",
+  metrics: {},
+  order: [],
+};
+
+function sysmonRegisterMetric(def) {
+  def.selectable = def.selectable !== false;
+  if (def.selectable) def.ring = sysmonRing();
+  sysmonState.metrics[def.id] = def;
+}
+
+var sysmonStorageCache = { usage: NaN, quota: NaN, t: 0 };
+function sysmonRefreshStorage() {
+  if (!navigator.storage || !navigator.storage.estimate) return;
+  navigator.storage.estimate().then(function(e) {
+    sysmonStorageCache = {
+      usage: (e.usage || 0) / (1024 * 1024),
+      quota: (e.quota || 0) / (1024 * 1024),
+      t: performance.now(),
+    };
+  }).catch(function() {});
+}
+
+function sysmonRegisterReal() {
+  sysmonRegisterMetric({
+    id: "fps", group: "real", label: "Frame Rate", unit: "fps",
+    color: "#c0ffd0",
+    format: function(v) { return Number.isFinite(v) ? v.toFixed(0) : "\u2014"; },
+    sample: function() { return sysmonState.fpsEMA; },
+  });
+  sysmonRegisterMetric({
+    id: "heapUsed", group: "real", label: "JS Heap Used", unit: "MiB",
+    color: "#ffe080",
+    format: function(v) { return Number.isFinite(v) ? v.toFixed(1) : "\u2014"; },
+    sample: function() {
+      var m = performance.memory;
+      return m ? m.usedJSHeapSize / (1024 * 1024) : NaN;
+    },
+  });
+  sysmonRegisterMetric({
+    id: "storageUsed", group: "real", label: "Storage Used", unit: "MiB",
+    color: "#80c0ff",
+    format: function(v) { return Number.isFinite(v) ? v.toFixed(1) : "\u2014"; },
+    sample: function() { return sysmonStorageCache.usage; },
+  });
+  sysmonRegisterMetric({
+    id: "downlink", group: "real", label: "Downlink", unit: "Mb/s",
+    color: "#80ffe0",
+    format: function(v) { return Number.isFinite(v) ? v.toFixed(1) : "\u2014"; },
+    sample: function() {
+      var c = navigator.connection;
+      return c && typeof c.downlink === "number" ? c.downlink : NaN;
+    },
+  });
+  sysmonRegisterMetric({
+    id: "cores", group: "real", label: "Logical Cores", unit: "cores",
+    selectable: false,
+    format: function(v) { return String(v); },
+    sample: function() { return navigator.hardwareConcurrency || 0; },
+  });
+  sysmonRegisterMetric({
+    id: "dpr", group: "real", label: "Device Pixel Ratio", unit: "\u00d7",
+    selectable: false,
+    format: function(v) { return v.toFixed(2); },
+    sample: function() { return window.devicePixelRatio || 1; },
+  });
+  sysmonRegisterMetric({
+    id: "viewport", group: "real", label: "Viewport", unit: "px",
+    selectable: false,
+    format: function() { return innerWidth + "\u00d7" + innerHeight; },
+    sample: function() { return 0; },
+  });
+  sysmonRegisterMetric({
+    id: "netType", group: "real", label: "Network Type", unit: "",
+    selectable: false,
+    format: function() { return (navigator.connection && navigator.connection.effectiveType) || "\u2014"; },
+    sample: function() { return 0; },
+  });
+  sysmonRegisterMetric({
+    id: "uptime", group: "real", label: "Session Uptime", unit: "",
+    selectable: false,
+    format: function() {
+      var s = Math.floor(performance.now() / 1000);
+      var hh = String(Math.floor(s / 3600)).padStart(2, "0");
+      var mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+      var ss = String(s % 60).padStart(2, "0");
+      return hh + ":" + mm + ":" + ss;
+    },
+    sample: function() { return 0; },
+  });
+  sysmonRegisterMetric({
+    id: "storageQuota", group: "real", label: "Storage Quota", unit: "MiB",
+    selectable: false,
+    format: function() { return Number.isFinite(sysmonStorageCache.quota) ? sysmonStorageCache.quota.toFixed(0) : "\u2014"; },
+    sample: function() { return 0; },
+  });
+}
+
+function sysmonRegisterPsyche() {
+  var temp = 34, load = 20;
+  sysmonRegisterMetric({
+    id: "psycheStatus", group: "psyche", label: "Chip", unit: "",
+    selectable: false,
+    format: function() { return "ONLINE"; },
+    sample: function() { return 0; },
+  });
+  sysmonRegisterMetric({
+    id: "psycheTemp", group: "psyche", label: "Temp", unit: "\u00b0C",
+    color: "#ff80a0",
+    format: function(v) { return v.toFixed(1); },
+    sample: function() {
+      temp += (Math.random() - 0.5) * 0.3;
+      if (temp < 30) temp = 30;
+      if (temp > 42) temp = 42;
+      return temp;
+    },
+  });
+  sysmonRegisterMetric({
+    id: "psycheLoad", group: "psyche", label: "Load", unit: "%",
+    color: "#ffa060",
+    format: function(v) { return v.toFixed(0); },
+    sample: function() {
+      var drift = document.hidden ? 0.4 : 0;
+      load += (Math.random() - 0.5) * 3 + drift;
+      if (load < 0) load = 0;
+      if (load > 100) load = 100;
+      return load;
+    },
+  });
+}
+
+function sysmonRegisterWired() {
+  var schu = 7.83;
+  var p7phase = 0, p7nextSpike = performance.now() + 20000;
+  var anchor = 99;
+  var t0 = performance.now();
+
+  sysmonRegisterMetric({
+    id: "schumann", group: "wired", label: "Schumann Resonance", unit: "Hz",
+    color: "#80ff80",
+    format: function(v) { return v.toFixed(3); },
+    sample: function() {
+      schu += (Math.random() - 0.5) * 0.02;
+      schu += (7.83 - schu) * 0.05;
+      if (schu < 7.6) schu = 7.6;
+      if (schu > 8.1) schu = 8.1;
+      return schu;
+    },
+  });
+  sysmonRegisterMetric({
+    id: "protocol7", group: "wired", label: "Protocol 7 Flux", unit: "",
+    color: "#80e0ff",
+    format: function(v) { return v.toFixed(1); },
+    sample: function() {
+      p7phase += 0.02;
+      var v = Math.sin(p7phase / 6) * 40 + (Math.random() - 0.5) * 10;
+      var now = performance.now();
+      if (now > p7nextSpike) {
+        v += 30;
+        p7nextSpike = now + 20000 + Math.random() * 20000;
+      }
+      return v;
+    },
+  });
+  sysmonRegisterMetric({
+    id: "bandwidth", group: "wired", label: "Wired Bandwidth", unit: "kb/s",
+    color: "#60c0ff",
+    format: function(v) { return v.toFixed(0); },
+    sample: function() {
+      var c = navigator.connection;
+      var base = c && typeof c.downlink === "number" ? c.downlink * 120 : 400;
+      return base + (Math.random() - 0.5) * base * 0.3;
+    },
+  });
+  sysmonRegisterMetric({
+    id: "anchor", group: "wired", label: "Reality Anchor", unit: "%",
+    color: "#ff80ff",
+    format: function(v) { return v.toFixed(2); },
+    sample: function() {
+      anchor += (Math.random() - 0.5) * 0.1;
+      if (Math.random() < 0.001) anchor -= 6;
+      anchor += (99 - anchor) * 0.05;
+      if (anchor < 85) anchor = 85;
+      if (anchor > 100) anchor = 100;
+      return anchor;
+    },
+  });
+  sysmonRegisterMetric({
+    id: "coherence", group: "wired", label: "Layer Coherence", unit: "",
+    color: "#a0a0ff",
+    format: function(v) { return v.toFixed(3); },
+    sample: function() {
+      var t = (performance.now() - t0) / 1000;
+      return 0.7 + 0.3 * Math.sin((2 * Math.PI * t) / 180);
+    },
+  });
+}
+
+function sysmonBuildOrder() {
+  sysmonState.order = [
+    { group: "real", title: "// REAL", ids: [
+      "fps","heapUsed","storageUsed","downlink",
+      "cores","dpr","viewport","netType","uptime","storageQuota",
+    ]},
+    { group: "psyche", title: "// PSYCHE", ids: ["psycheStatus","psycheTemp","psycheLoad"] },
+    { group: "wired", title: "// WIRED", ids: ["schumann","protocol7","bandwidth","anchor","coherence"] },
+  ];
+}
+
+// -- Sampling loops --
+function sysmonFrameTick(t) {
+  if (!sysmonState.isOpen) { sysmonState.rafId = null; return; }
+  if (sysmonState.lastFrameT) {
+    var dt = t - sysmonState.lastFrameT;
+    if (dt > 0) {
+      var inst = 1000 / dt;
+      sysmonState.fpsEMA = sysmonState.fpsEMA * 0.9 + inst * 0.1;
+    }
+  }
+  sysmonState.lastFrameT = t;
+  sysmonState.rafId = requestAnimationFrame(sysmonFrameTick);
+}
+
+var sysmonStorageTickCounter = 0;
+function sysmonTick() {
+  if (!sysmonState.isOpen) return;
+  if ((sysmonStorageTickCounter++ % 50) === 0) sysmonRefreshStorage();
+  for (var id in sysmonState.metrics) {
+    var m = sysmonState.metrics[id];
+    var v = m.sample();
+    if (m.ring) sysmonPush(m.ring, v);
+  }
+  sysmonRenderAll();
+}
+
+function sysmonStart() {
+  if (sysmonState.intervalId) return;
+  sysmonState.lastFrameT = 0;
+  sysmonState.rafId = requestAnimationFrame(sysmonFrameTick);
+  var period = matchMedia("(prefers-reduced-motion: reduce)").matches ? 500 : (1000 / SYSMON_HZ);
+  sysmonState.intervalId = setInterval(sysmonTick, period);
+  sysmonRefreshStorage();
+}
+
+function sysmonStop() {
+  if (sysmonState.rafId) cancelAnimationFrame(sysmonState.rafId);
+  sysmonState.rafId = null;
+  if (sysmonState.intervalId) clearInterval(sysmonState.intervalId);
+  sysmonState.intervalId = null;
+}
+
+// -- Sidebar renderer --
+function sysmonBuildSidebar() {
+  var sidebar = document.getElementById("sysmon-sidebar");
+  if (!sidebar) return;
+  sidebar.innerHTML = "";
+  for (var si = 0; si < sysmonState.order.length; si++) {
+    var section = sysmonState.order[si];
+    var h = document.createElement("div");
+    h.className = "sysmon-section-header";
+    h.textContent = section.title;
+    sidebar.appendChild(h);
+
+    for (var mi = 0; mi < section.ids.length; mi++) {
+      var id = section.ids[mi];
+      var m = sysmonState.metrics[id];
+      if (!m) continue;
+      var row = document.createElement("div");
+      row.className = "sysmon-row" + (m.selectable ? "" : " static");
+      row.dataset.metricId = id;
+      if (m.selectable) row.addEventListener("click", (function(mid) {
+        return function() { sysmonSelect(mid); };
+      })(id));
+
+      var label = document.createElement("div");
+      label.className = "sysmon-row-label";
+      label.textContent = m.label;
+
+      var val = document.createElement("div");
+      val.className = "sysmon-row-value";
+      val.textContent = "\u2014";
+
+      row.appendChild(label);
+      row.appendChild(val);
+
+      if (m.selectable) {
+        var svgNS = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("class", "sysmon-row-spark");
+        svg.setAttribute("viewBox", "0 0 100 20");
+        svg.setAttribute("preserveAspectRatio", "none");
+        var poly = document.createElementNS(svgNS, "polyline");
+        poly.setAttribute("stroke", m.color || "#0f0");
+        poly.setAttribute("fill", "none");
+        poly.setAttribute("stroke-width", "1");
+        svg.appendChild(poly);
+        row.appendChild(svg);
+      }
+      sidebar.appendChild(row);
+    }
+  }
+  sysmonMarkSelected();
+}
+
+function sysmonMarkSelected() {
+  var rows = document.querySelectorAll("#sysmon-sidebar .sysmon-row");
+  rows.forEach(function(r) { r.classList.toggle("selected", r.dataset.metricId === sysmonState.selectedId); });
+}
+
+function sysmonUpdateSidebar() {
+  var rows = document.querySelectorAll("#sysmon-sidebar .sysmon-row");
+  rows.forEach(function(row) {
+    var id = row.dataset.metricId;
+    var m = sysmonState.metrics[id];
+    if (!m) return;
+    var valEl = row.querySelector(".sysmon-row-value");
+
+    if (m.ring) {
+      var v = sysmonLast(m.ring);
+      valEl.textContent = m.format(v) + (m.unit ? " " + m.unit : "");
+      var poly = row.querySelector("polyline");
+      if (poly) poly.setAttribute("points", sysmonSparkPoints(m.ring));
+    } else {
+      valEl.textContent = m.format(0) + (m.unit ? " " + m.unit : "");
+    }
+  });
+}
+
+function sysmonSparkPoints(ring) {
+  var n = ring.filled;
+  if (n < 2) return "";
+  var mm = sysmonMinMax(ring);
+  var lo = mm[0], hi = mm[1];
+  var range = (hi - lo) || 1;
+  var start = (ring.head - n + SYSMON_MAX_SAMPLES) % SYSMON_MAX_SAMPLES;
+  var out = "";
+  for (var i = 0; i < n; i++) {
+    var v = ring.buf[(start + i) % SYSMON_MAX_SAMPLES];
+    if (!Number.isFinite(v)) continue;
+    var x = (i / (SYSMON_MAX_SAMPLES - 1)) * 100;
+    var y = 20 - ((v - lo) / range) * 20;
+    out += (out ? " " : "") + x.toFixed(1) + "," + y.toFixed(1);
+  }
+  return out;
+}
+
+function sysmonSelect(id) {
+  var m = sysmonState.metrics[id];
+  if (!m || !m.selectable) return;
+  sysmonState.selectedId = id;
+  sysmonMarkSelected();
+}
+
+// -- Big chart --
+function sysmonResizeCanvas() {
+  var c = document.getElementById("sysmon-canvas");
+  if (!c) return;
+  var rect = c.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+  c.width = Math.max(1, Math.floor(rect.width * dpr));
+  c.height = Math.max(1, Math.floor(rect.height * dpr));
+}
+
+function sysmonRenderBigChart() {
+  var c = document.getElementById("sysmon-canvas");
+  if (!c) return;
+  var ctx = c.getContext("2d");
+  var W = c.width, H = c.height;
+  ctx.clearRect(0, 0, W, H);
+
+  var m = sysmonState.metrics[sysmonState.selectedId];
+  if (!m || !m.ring) return;
+
+  var labelEl = document.getElementById("sysmon-chart-label");
+  if (labelEl) labelEl.textContent = m.label + (m.unit ? " / " + m.unit : "");
+
+  var mm = sysmonMinMax(m.ring);
+  var lo = mm[0], hi = mm[1];
+  var cur = sysmonLast(m.ring);
+  document.getElementById("sysmon-cur").textContent = Number.isFinite(cur) ? m.format(cur) : "\u2014";
+  document.getElementById("sysmon-min").textContent = Number.isFinite(lo)  ? m.format(lo)  : "\u2014";
+  document.getElementById("sysmon-max").textContent = Number.isFinite(hi)  ? m.format(hi)  : "\u2014";
+
+  if (m.ring.filled < 2 || !Number.isFinite(lo)) return;
+  var range = (hi - lo) || 1;
+
+  ctx.strokeStyle = "rgba(0, 255, 100, 0.12)";
+  ctx.lineWidth = 1;
+  for (var s = 0; s <= SYSMON_WINDOW_S; s += 10) {
+    var gx = Math.floor((s / SYSMON_WINDOW_S) * W) + 0.5;
+    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+  }
+  var fracs = [0, 0.5, 1];
+  for (var fi = 0; fi < fracs.length; fi++) {
+    var gy = Math.floor(fracs[fi] * H) + 0.5;
+    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+  }
+
+  ctx.strokeStyle = m.color || "#0f0";
+  ctx.lineWidth = Math.max(1, (window.devicePixelRatio || 1));
+  ctx.beginPath();
+  var n = m.ring.filled;
+  var start = (m.ring.head - n + SYSMON_MAX_SAMPLES) % SYSMON_MAX_SAMPLES;
+  var penDown = false;
+  for (var i = 0; i < n; i++) {
+    var v = m.ring.buf[(start + i) % SYSMON_MAX_SAMPLES];
+    if (!Number.isFinite(v)) { penDown = false; continue; }
+    var px = (i / (SYSMON_MAX_SAMPLES - 1)) * W;
+    var py = H - ((v - lo) / range) * H;
+    if (!penDown) { ctx.moveTo(px, py); penDown = true; }
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+}
+
+var sysmonResizeObs = null;
+function sysmonAttachResize() {
+  var c = document.getElementById("sysmon-canvas");
+  if (!c || sysmonResizeObs) return;
+  sysmonResizeObs = new ResizeObserver(function() {
+    sysmonResizeCanvas();
+    sysmonRenderBigChart();
+  });
+  sysmonResizeObs.observe(c);
+}
+
+// -- Process table --
+var SYSMON_DAEMONS = [
+  { pid: "0001", name: "copland.os",   thr: 4, load: function() { return 1 + Math.random() * 3; } },
+  { pid: "0042", name: "navi.sys",     thr: 2, load: function() { return 8 + Math.sin(performance.now() / 4000) * 4 + Math.random() * 2; } },
+  { pid: "0073", name: "psyche.drv",   thr: 1, load: function() {
+      var r = sysmonState.metrics.psycheLoad && sysmonState.metrics.psycheLoad.ring;
+      return r ? (sysmonLast(r) / 10) : 2;
+    }},
+  { pid: "0128", name: "protocol7.d",  thr: 1, load: function() {
+      var r = sysmonState.metrics.protocol7 && sysmonState.metrics.protocol7.ring;
+      var v = r ? sysmonLast(r) : 0;
+      return Math.min(15, Math.abs(v) / 6);
+    }},
+  { pid: "0256", name: "schumann.mon", thr: 1, load: function() {
+      var r = sysmonState.metrics.schumann && sysmonState.metrics.schumann.ring;
+      var v = r ? sysmonLast(r) : 7.83;
+      return Math.abs(v - 7.83) * 100;
+    }},
+  { pid: "0333", name: "wired.link",   thr: 1, load: function() {
+      var r = sysmonState.metrics.bandwidth && sysmonState.metrics.bandwidth.ring;
+      var v = r ? sysmonLast(r) : 400;
+      return Math.min(20, v / 40);
+    }},
+];
+
+var SYSMON_REAL_PROCS = [
+  { slot: 1, name: "terminal",    thr: 1, check: function() { var el = document.querySelector(".terminal-window"); return !!(el && el.classList.contains("visible")); }},
+  { slot: 2, name: "connections", thr: 1, check: function() { var el = document.getElementById("connections-sidebar"); return !!(el && el.classList.contains("visible")); }},
+  { slot: 3, name: "music",       thr: 2, check: function() { var el = document.getElementById("music-panel"); return !!(el && el.classList.contains("visible")); }},
+  { slot: 4, name: "tv",          thr: 1, check: function() { var el = document.getElementById("tv-panel"); return !!(el && el.classList.contains("visible")); }},
+  { slot: 5, name: "bg.conf",     thr: 1, check: function() { var el = document.getElementById("bg-picker"); return !!(el && el.classList.contains("visible")); }},
+  { slot: 6, name: "about_me",    thr: 1, check: function() { var el = document.getElementById("about-panel"); return !!(el && el.classList.contains("visible")); }},
+  { slot: 7, name: "sysmon",      thr: 2, check: function() { return sysmonState.isOpen; }},
+];
+
+function sysmonPad(s, n) { return (s + "                ").slice(0, n); }
+
+var sysmonProcTickCounter = 0;
+function sysmonRenderProcTable() {
+  if ((sysmonProcTickCounter++ % SYSMON_HZ) !== 0) return;
+  var table = document.getElementById("sysmon-proc-table");
+  if (!table) return;
+  var rows = [];
+  rows.push(sysmonPad("PID", 6) + sysmonPad("NAME", 16) + sysmonPad("THR", 6) + "LOAD");
+  for (var di = 0; di < SYSMON_DAEMONS.length; di++) {
+    var d = SYSMON_DAEMONS[di];
+    rows.push(sysmonPad(d.pid, 6) + sysmonPad(d.name, 16) + sysmonPad(String(d.thr), 6) + d.load().toFixed(0) + "%");
+  }
+  for (var pi = 0; pi < SYSMON_REAL_PROCS.length; pi++) {
+    var p = SYSMON_REAL_PROCS[pi];
+    if (!p.check()) continue;
+    var pid = "02" + String(p.slot).padStart(2, "0");
+    var pload = (Math.random() * 5).toFixed(0) + "%";
+    rows.push(sysmonPad(pid, 6) + sysmonPad(p.name, 16) + sysmonPad(String(p.thr), 6) + pload);
+  }
+  table.textContent = rows.join("\n");
+}
+
+function sysmonRenderAll() {
+  sysmonUpdateSidebar();
+  sysmonRenderBigChart();
+  sysmonRenderProcTable();
+}
+
+// -- Lifecycle --
+function sysmonOpen() {
+  var panel = document.getElementById("sysmon-panel");
+  if (!panel) return;
+  panel.classList.add("visible");
+  bringToFront(panel);
+  sysmonState.isOpen = true;
+  sysmonResizeCanvas();
+  sysmonStart();
+  updateTaskbar();
+}
+function sysmonClose() {
+  var panel = document.getElementById("sysmon-panel");
+  if (!panel) return;
+  panel.classList.remove("visible");
+  sysmonState.isOpen = false;
+  sysmonStop();
+  updateTaskbar();
+}
+function closeSysmon()    { sysmonClose(); }
+function minimizeSysmon() { sysmonClose(); }
+function restoreSysmon()  { sysmonOpen(); }
+function taskbarToggleSysmon() {
+  if (sysmonState.isOpen) sysmonClose(); else sysmonOpen();
+}
+
+function sysmonInitDrag() {
+  var panel = document.getElementById("sysmon-panel");
+  var title = panel && panel.querySelector(".sysmon-titlebar");
+  if (!panel || !title) return;
+  panel.addEventListener("mousedown", function() { bringToFront(panel); });
+  var dragging = false, ox = 0, oy = 0;
+  title.addEventListener("mousedown", function(e) {
+    if (e.target.classList.contains("dot")) return;
+    dragging = true;
+    var rect = panel.getBoundingClientRect();
+    ox = e.clientX - rect.left;
+    oy = e.clientY - rect.top;
+    panel.style.transform = "none";
+    panel.style.left = rect.left + "px";
+    panel.style.top  = rect.top + "px";
+    panel.classList.add("dragging");
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", function(e) {
+    if (!dragging) return;
+    panel.style.left = (e.clientX - ox) + "px";
+    panel.style.top  = (e.clientY - oy) + "px";
+  });
+  document.addEventListener("mouseup", function() {
+    if (!dragging) return;
+    dragging = false;
+    panel.classList.remove("dragging");
+  });
+}
+
+document.addEventListener("visibilitychange", function() {
+  if (!sysmonState.isOpen) return;
+  if (document.hidden) {
+    if (sysmonState.intervalId) {
+      clearInterval(sysmonState.intervalId);
+      sysmonState.intervalId = setInterval(sysmonTick, 500);
+    }
+  } else {
+    if (sysmonState.intervalId) {
+      clearInterval(sysmonState.intervalId);
+      var period = matchMedia("(prefers-reduced-motion: reduce)").matches ? 500 : (1000 / SYSMON_HZ);
+      sysmonState.intervalId = setInterval(sysmonTick, period);
+    }
+  }
+});
+
+function sysmonInit() {
+  sysmonRegisterReal();
+  sysmonRegisterPsyche();
+  sysmonRegisterWired();
+  sysmonBuildOrder();
+  sysmonBuildSidebar();
+  sysmonAttachResize();
+  sysmonInitDrag();
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", sysmonInit);
+} else {
+  sysmonInit();
+}
