@@ -1202,39 +1202,64 @@ html, body {
 /* ─── Sys-monitor ─────────────────────────────────────── */
 #sysmon-panel {
   position: absolute;
+  bottom: 60px;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 720px;
-  height: 420px;
-  min-width: 520px;
-  min-height: 320px;
-  background: rgba(4, 10, 6, 0.92);
-  border: 1px solid var(--accent, #0f0);
-  box-shadow: 0 0 24px rgba(0, 255, 100, 0.15);
-  display: none;
+  transform: translateX(-50%);
+  z-index: 13;
+  width: 520px;
+  height: 360px;
+  min-width: 460px;
+  min-height: 48px;
+  max-width: calc(100% - 48px);
+  max-height: calc(100% - 40px - 48px);
+  background: rgba(8, 8, 16, 0.52);
+  backdrop-filter: blur(8px);
+  border: 3px solid #1a1a2e;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px #00ffcc22, 0 0 24px rgba(0,0,0,0.9),
+              inset 0 0 12px rgba(0,0,0,0.6);
+  display: flex;
   flex-direction: column;
+  overflow: hidden;
+  resize: both;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
   font-family: 'Share Tech Mono', monospace;
-  color: var(--text, #c0ffd0);
-  z-index: 30;
+  color: var(--text);
 }
-#sysmon-panel.visible { display: flex; }
-#sysmon-panel.dragging { transition: none; user-select: none; }
+
+#sysmon-panel.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#sysmon-panel.minimized .sysmon-body {
+  display: none;
+}
+
+#sysmon-panel.dragging .sysmon-titlebar {
+  animation: cursor-drag 800ms steps(1) infinite;
+}
 
 .sysmon-titlebar {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
-  background: rgba(0, 40, 10, 0.7);
-  border-bottom: 1px solid var(--accent, #0f0);
-  cursor: move;
-  font-size: 11px;
+  padding: 9px 12px;
+  background: rgba(0, 255, 204, 0.04);
+  border-bottom: 1px solid #1a1a2e;
+  border-radius: 11px 11px 0 0;
+  user-select: none;
+  animation: cursor-drag 800ms steps(1) infinite;
+  flex-shrink: 0;
 }
 .sysmon-title {
-  margin-left: auto;
-  opacity: 0.75;
-  letter-spacing: 0.5px;
+  margin-left: 6px;
+  font-size: 0.78rem;
+  color: var(--accent);
+  opacity: 0.8;
+  letter-spacing: 0.06em;
 }
 
 .sysmon-body {
@@ -1246,48 +1271,59 @@ html, body {
 .sysmon-sidebar {
   width: 36%;
   min-width: 200px;
-  padding: 6px;
-  border-right: 1px solid rgba(0, 255, 100, 0.25);
+  padding: 10px 12px;
+  border-right: 1px solid #00ffcc22;
   overflow-y: auto;
-  font-size: 11px;
+  font-size: 0.72rem;
+  color: #a8ffe8;
+  scrollbar-width: thin;
+  scrollbar-color: #00ffcc44 transparent;
 }
+.sysmon-sidebar::-webkit-scrollbar { width: 6px; }
+.sysmon-sidebar::-webkit-scrollbar-thumb { background: #00ffcc44; border-radius: 3px; }
 
 .sysmon-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
 }
 
 .sysmon-chart-wrap {
   flex: 1 1 70%;
   display: flex;
   flex-direction: column;
-  padding: 6px 8px;
+  padding: 10px 14px 8px;
   min-height: 0;
 }
 .sysmon-chart-header {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
-  opacity: 0.8;
-  margin-bottom: 4px;
+  font-size: 0.72rem;
+  color: var(--accent);
+  opacity: 0.85;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
 }
 #sysmon-canvas {
   flex: 1;
+  min-height: 0;
   width: 100%;
-  background: repeating-linear-gradient(0deg, rgba(0,255,100,0.04) 0 1px, transparent 1px 40px);
-  border: 1px solid rgba(0, 255, 100, 0.2);
+  background: rgba(0, 255, 204, 0.02);
+  border: 1px solid #00ffcc22;
+  border-radius: 2px;
 }
 .sysmon-chart-footer {
   display: flex;
   gap: 16px;
-  margin-top: 4px;
-  font-size: 11px;
+  margin-top: 6px;
+  font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
   opacity: 0.85;
+  color: #a8ffe8;
 }
-.sysmon-chart-footer b { color: var(--accent, #0f0); font-weight: normal; }
+.sysmon-chart-footer b { color: var(--accent); font-weight: normal; text-shadow: 0 0 6px #00ffcc88; }
 
 .sysmon-proc-wrap {
   flex: 0 0 30%;
@@ -1295,24 +1331,36 @@ html, body {
   max-height: 40%;
   display: flex;
   flex-direction: column;
-  border-top: 1px solid rgba(0, 255, 100, 0.25);
-  padding: 4px 8px;
+  border-top: 1px solid #00ffcc22;
+  padding: 6px 14px 10px;
 }
-.sysmon-proc-header { font-size: 10px; opacity: 0.55; margin-bottom: 2px; }
+.sysmon-proc-header {
+  font-size: 0.7rem;
+  color: var(--accent);
+  opacity: 0.6;
+  margin-bottom: 4px;
+  letter-spacing: 0.06em;
+}
 .sysmon-proc-table {
   flex: 1;
   overflow-y: auto;
-  font-size: 10px;
+  font-size: 0.7rem;
   font-variant-numeric: tabular-nums;
   line-height: 1.4;
   white-space: pre;
+  color: #a8ffe8;
+  scrollbar-width: thin;
+  scrollbar-color: #00ffcc44 transparent;
 }
+.sysmon-proc-table::-webkit-scrollbar { width: 6px; }
+.sysmon-proc-table::-webkit-scrollbar-thumb { background: #00ffcc44; border-radius: 3px; }
 
 .sysmon-section-header {
-  font-size: 10px;
+  font-size: 0.7rem;
+  color: var(--accent);
   opacity: 0.55;
-  margin: 6px 2px 2px 2px;
-  letter-spacing: 0.5px;
+  margin: 8px 2px 3px 2px;
+  letter-spacing: 0.06em;
 }
 .sysmon-section-header:first-child { margin-top: 0; }
 
@@ -1321,22 +1369,25 @@ html, body {
   grid-template-columns: 1fr auto;
   grid-template-rows: auto auto;
   grid-column-gap: 6px;
-  padding: 3px 4px;
+  padding: 3px 5px;
   border: 1px solid transparent;
+  border-radius: 3px;
   cursor: pointer;
+  animation: cursor-pointer 800ms steps(1) infinite;
 }
-.sysmon-row:hover { background: rgba(0, 255, 100, 0.05); }
+.sysmon-row:hover { background: rgba(0, 255, 204, 0.05); }
 .sysmon-row.selected {
-  border-color: var(--accent, #0f0);
-  background: rgba(0, 255, 100, 0.08);
+  border-color: #00ffcc66;
+  background: rgba(0, 255, 204, 0.08);
+  text-shadow: 0 0 6px #00ffcc55;
 }
-.sysmon-row.static { cursor: default; }
+.sysmon-row.static { cursor: default; animation: none; }
 .sysmon-row.static:hover { background: transparent; }
 
-.sysmon-row-label { opacity: 0.7; font-size: 10px; }
-.sysmon-row-value { text-align: right; font-variant-numeric: tabular-nums; }
+.sysmon-row-label { opacity: 0.65; font-size: 0.68rem; color: #a8ffe8; }
+.sysmon-row-value { text-align: right; font-variant-numeric: tabular-nums; color: var(--accent); }
 .sysmon-row-spark { grid-column: 1 / -1; height: 16px; width: 100%; }
-.sysmon-row-spark polyline { fill: none; stroke: var(--accent, #0f0); stroke-width: 1; }
+.sysmon-row-spark polyline { fill: none; stroke: var(--accent); stroke-width: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   #sysmon-canvas { image-rendering: pixelated; }

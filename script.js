@@ -880,12 +880,9 @@ async function runTerminalSequence() {
   tvPanel.classList.add('visible');
   setTimeout(() => tvPanel.classList.remove('tv-first-show'), 700);
 
-  // Show About panel by default with zoom animation
+  // Show Sys-monitor panel by default (fades in via opacity transition)
   await wait(150);
-  const aboutPanel = document.getElementById('about-panel');
-  aboutPanel.classList.add('about-first-show');
-  aboutPanel.classList.add('visible');
-  setTimeout(() => aboutPanel.classList.remove('about-first-show'), 700);
+  sysmonOpen();
 
   updateTaskbar();
 
@@ -1195,6 +1192,27 @@ function sysmonRegisterMetric(def) {
   sysmonState.metrics[def.id] = def;
 }
 
+// Micro-benchmark: measures effective CPU throughput by timing a
+// fixed-size math loop. First ~5 calls establish a median baseline
+// treated as `SYSMON_CPU_NOMINAL_GHZ`; subsequent calls scale
+// linearly off that baseline, so the displayed "clock" dips when
+// the browser is under load and recovers when idle.
+var SYSMON_CPU_NOMINAL_GHZ = 3.2;
+var SYSMON_CPU_ITERS = 200000;
+var sysmonCpuBenchSink = 0;
+var sysmonCpuCalibSamples = [];
+var sysmonCpuBaselineIpms = 0;
+function sysmonCpuBench() {
+  var t0 = performance.now();
+  var x = 1.0;
+  for (var i = 0; i < SYSMON_CPU_ITERS; i++) {
+    x = Math.sqrt(x + i * 0.5) + 1.0;
+  }
+  sysmonCpuBenchSink = x; // prevent dead-code elimination
+  var dt = performance.now() - t0;
+  return dt > 0 ? SYSMON_CPU_ITERS / dt : SYSMON_CPU_ITERS;
+}
+
 var sysmonStorageCache = { usage: NaN, quota: NaN, t: 0 };
 function sysmonRefreshStorage() {
   if (!navigator.storage || !navigator.storage.estimate) return;
@@ -1209,61 +1227,96 @@ function sysmonRefreshStorage() {
 
 function sysmonRegisterReal() {
   sysmonRegisterMetric({
-    id: "fps", group: "real", label: "Frame Rate", unit: "fps",
+    id: "fps", group: "real", label: "Navi Refresh", unit: "fps",
     color: "#c0ffd0",
     format: function(v) { return Number.isFinite(v) ? v.toFixed(0) : "\u2014"; },
     sample: function() { return sysmonState.fpsEMA; },
   });
   sysmonRegisterMetric({
-    id: "heapUsed", group: "real", label: "JS Heap Used", unit: "MiB",
+    id: "heapUsed", group: "real", label: "Navi Nodes", unit: "nodes",
     color: "#ffe080",
-    format: function(v) { return Number.isFinite(v) ? v.toFixed(1) : "\u2014"; },
+    format: function(v) { return Number.isFinite(v) ? String(Math.round(v)) : "\u2014"; },
     sample: function() {
-      var m = performance.memory;
-      return m ? m.usedJSHeapSize / (1024 * 1024) : NaN;
+      // Live DOM element count. `performance.memory.usedJSHeapSize`
+      // is quantized to ~100 KB on a ~20 s cooldown in Chromium
+      // without cross-origin isolation, so it reads as a flat line;
+      // DOM node count actually changes when panels open/close and
+      // when the terminal appends output.
+      return document.getElementsByTagName("*").length;
     },
   });
   sysmonRegisterMetric({
-    id: "storageUsed", group: "real", label: "Storage Used", unit: "MiB",
+    id: "storageUsed", group: "real", label: "Navi Storage", unit: "MiB",
     color: "#80c0ff",
     format: function(v) { return Number.isFinite(v) ? v.toFixed(1) : "\u2014"; },
-    sample: function() { return sysmonStorageCache.usage; },
-  });
-  sysmonRegisterMetric({
-    id: "downlink", group: "real", label: "Downlink", unit: "Mb/s",
-    color: "#80ffe0",
-    format: function(v) { return Number.isFinite(v) ? v.toFixed(1) : "\u2014"; },
     sample: function() {
-      var c = navigator.connection;
-      return c && typeof c.downlink === "number" ? c.downlink : NaN;
+      // Sum of decoded image pixel buffers currently held in the
+      // DOM (4 bytes/px RGBA). This works regardless of protocol,
+      // unlike Resource Timing (zero on file://) and navigator.
+      // storage.estimate() (zero for origins with no IDB/Cache).
+      var imgs = document.images;
+      var bytes = 0;
+      for (var i = 0; i < imgs.length; i++) {
+        var img = imgs[i];
+        if (img.complete && img.naturalWidth > 0) {
+          bytes += img.naturalWidth * img.naturalHeight * 4;
+        }
+      }
+      return bytes / (1024 * 1024);
     },
   });
   sysmonRegisterMetric({
-    id: "cores", group: "real", label: "Logical Cores", unit: "cores",
+    id: "downlink", group: "real", label: "Wired Downlink", unit: "Mb/s",
+    selectable: false,
+    format: function() {
+      var c = navigator.connection;
+      return c && typeof c.downlink === "number" ? c.downlink.toFixed(1) : "\u2014";
+    },
+    sample: function() { return 0; },
+  });
+  sysmonRegisterMetric({
+    id: "cores", group: "real", label: "Navi Cores", unit: "cores",
     selectable: false,
     format: function(v) { return String(v); },
     sample: function() { return navigator.hardwareConcurrency || 0; },
   });
   sysmonRegisterMetric({
-    id: "dpr", group: "real", label: "Device Pixel Ratio", unit: "\u00d7",
+    id: "cpuSpeed", group: "real", label: "Navi Clock", unit: "GHz",
+    color: "#ffb080",
+    format: function(v) { return Number.isFinite(v) ? v.toFixed(2) : "\u2014"; },
+    sample: function() {
+      var ipms = sysmonCpuBench();
+      if (sysmonCpuBaselineIpms === 0) {
+        sysmonCpuCalibSamples.push(ipms);
+        if (sysmonCpuCalibSamples.length >= 5) {
+          var sorted = sysmonCpuCalibSamples.slice().sort(function(a, b) { return a - b; });
+          sysmonCpuBaselineIpms = sorted[2]; // median of 5
+        }
+        return SYSMON_CPU_NOMINAL_GHZ;
+      }
+      return SYSMON_CPU_NOMINAL_GHZ * (ipms / sysmonCpuBaselineIpms);
+    },
+  });
+  sysmonRegisterMetric({
+    id: "dpr", group: "real", label: "Pixel Ratio", unit: "\u00d7",
     selectable: false,
     format: function(v) { return v.toFixed(2); },
     sample: function() { return window.devicePixelRatio || 1; },
   });
   sysmonRegisterMetric({
-    id: "viewport", group: "real", label: "Viewport", unit: "px",
+    id: "viewport", group: "real", label: "Display Surface", unit: "px",
     selectable: false,
     format: function() { return innerWidth + "\u00d7" + innerHeight; },
     sample: function() { return 0; },
   });
   sysmonRegisterMetric({
-    id: "netType", group: "real", label: "Network Type", unit: "",
+    id: "netType", group: "real", label: "Internet Protocol", unit: "",
     selectable: false,
-    format: function() { return (navigator.connection && navigator.connection.effectiveType) || "\u2014"; },
+    format: function() { return "protocol 7"; },
     sample: function() { return 0; },
   });
   sysmonRegisterMetric({
-    id: "uptime", group: "real", label: "Session Uptime", unit: "",
+    id: "uptime", group: "real", label: "Copland Uptime", unit: "",
     selectable: false,
     format: function() {
       var s = Math.floor(performance.now() / 1000);
@@ -1275,7 +1328,7 @@ function sysmonRegisterReal() {
     sample: function() { return 0; },
   });
   sysmonRegisterMetric({
-    id: "storageQuota", group: "real", label: "Storage Quota", unit: "MiB",
+    id: "storageQuota", group: "real", label: "Storage Ceiling", unit: "MiB",
     selectable: false,
     format: function() { return Number.isFinite(sysmonStorageCache.quota) ? sysmonStorageCache.quota.toFixed(0) : "\u2014"; },
     sample: function() { return 0; },
@@ -1285,13 +1338,13 @@ function sysmonRegisterReal() {
 function sysmonRegisterPsyche() {
   var temp = 34, load = 20;
   sysmonRegisterMetric({
-    id: "psycheStatus", group: "psyche", label: "Chip", unit: "",
+    id: "psycheStatus", group: "psyche", label: "Psyche Chip", unit: "",
     selectable: false,
     format: function() { return "ONLINE"; },
     sample: function() { return 0; },
   });
   sysmonRegisterMetric({
-    id: "psycheTemp", group: "psyche", label: "Temp", unit: "\u00b0C",
+    id: "psycheTemp", group: "psyche", label: "Chip Temp", unit: "\u00b0C",
     color: "#ff80a0",
     format: function(v) { return v.toFixed(1); },
     sample: function() {
@@ -1302,7 +1355,7 @@ function sysmonRegisterPsyche() {
     },
   });
   sysmonRegisterMetric({
-    id: "psycheLoad", group: "psyche", label: "Load", unit: "%",
+    id: "psycheLoad", group: "psyche", label: "Chip Load", unit: "%",
     color: "#ffa060",
     format: function(v) { return v.toFixed(0); },
     sample: function() {
@@ -1320,6 +1373,8 @@ function sysmonRegisterWired() {
   var p7phase = 0, p7nextSpike = performance.now() + 20000;
   var anchor = 99;
   var t0 = performance.now();
+  var knights = 4, knightsNextBurst = performance.now() + 15000;
+  var omni = 0.42;
 
   sysmonRegisterMetric({
     id: "schumann", group: "wired", label: "Schumann Resonance", unit: "Hz",
@@ -1380,16 +1435,49 @@ function sysmonRegisterWired() {
       return 0.7 + 0.3 * Math.sin((2 * Math.PI * t) / 180);
     },
   });
+  sysmonRegisterMetric({
+    id: "knights", group: "wired", label: "Knights Activity", unit: "%",
+    color: "#ff6080",
+    format: function(v) { return v.toFixed(0); },
+    sample: function() {
+      knights += (Math.random() - 0.5) * 1.2;
+      knights += (4 - knights) * 0.08;
+      var now = performance.now();
+      if (now > knightsNextBurst) {
+        knights += 25 + Math.random() * 30;
+        knightsNextBurst = now + 15000 + Math.random() * 30000;
+      }
+      if (knights < 0) knights = 0;
+      if (knights > 100) knights = 100;
+      return knights;
+    },
+  });
+  sysmonRegisterMetric({
+    id: "omnipresence", group: "wired", label: "Omnipresence", unit: "",
+    color: "#e0a0ff",
+    format: function(v) { return v.toFixed(3); },
+    sample: function() {
+      var t = (performance.now() - t0) / 1000;
+      omni = 0.42 + 0.18 * Math.sin((2 * Math.PI * t) / 240)
+                  + 0.06 * Math.sin((2 * Math.PI * t) / 37)
+                  + (Math.random() - 0.5) * 0.02;
+      if (omni < 0) omni = 0;
+      if (omni > 1) omni = 1;
+      return omni;
+    },
+  });
 }
 
 function sysmonBuildOrder() {
   sysmonState.order = [
-    { group: "real", title: "// REAL", ids: [
-      "fps","heapUsed","storageUsed","downlink",
+    { group: "real", title: "// NAVI", ids: [
+      "fps","cpuSpeed","heapUsed","storageUsed","downlink",
       "cores","dpr","viewport","netType","uptime","storageQuota",
     ]},
     { group: "psyche", title: "// PSYCHE", ids: ["psycheStatus","psycheTemp","psycheLoad"] },
-    { group: "wired", title: "// WIRED", ids: ["schumann","protocol7","bandwidth","anchor","coherence"] },
+    { group: "wired", title: "// WIRED", ids: [
+      "schumann","protocol7","bandwidth","anchor","coherence","knights","omnipresence",
+    ]},
   ];
 }
 
@@ -1476,7 +1564,7 @@ function sysmonBuildSidebar() {
         svg.setAttribute("viewBox", "0 0 100 20");
         svg.setAttribute("preserveAspectRatio", "none");
         var poly = document.createElementNS(svgNS, "polyline");
-        poly.setAttribute("stroke", m.color || "#0f0");
+        poly.setAttribute("stroke", m.color || "#00ffcc");
         poly.setAttribute("fill", "none");
         poly.setAttribute("stroke-width", "1");
         svg.appendChild(poly);
@@ -1507,7 +1595,7 @@ function sysmonUpdateSidebar() {
       var poly = row.querySelector("polyline");
       if (poly) poly.setAttribute("points", sysmonSparkPoints(m.ring));
     } else {
-      valEl.textContent = m.format(0) + (m.unit ? " " + m.unit : "");
+      valEl.textContent = m.format(m.sample()) + (m.unit ? " " + m.unit : "");
     }
   });
 }
@@ -1570,7 +1658,7 @@ function sysmonRenderBigChart() {
   if (m.ring.filled < 2 || !Number.isFinite(lo)) return;
   var range = (hi - lo) || 1;
 
-  ctx.strokeStyle = "rgba(0, 255, 100, 0.12)";
+  ctx.strokeStyle = "rgba(0, 255, 204, 0.15)";
   ctx.lineWidth = 1;
   for (var s = 0; s <= SYSMON_WINDOW_S; s += 10) {
     var gx = Math.floor((s / SYSMON_WINDOW_S) * W) + 0.5;
@@ -1582,7 +1670,7 @@ function sysmonRenderBigChart() {
     ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
   }
 
-  ctx.strokeStyle = m.color || "#0f0";
+  ctx.strokeStyle = m.color || "#00ffcc";
   ctx.lineWidth = Math.max(1, (window.devicePixelRatio || 1));
   ctx.beginPath();
   var n = m.ring.filled;
@@ -1612,27 +1700,44 @@ function sysmonAttachResize() {
 
 // -- Process table --
 var SYSMON_DAEMONS = [
-  { pid: "0001", name: "copland.os",   thr: 4, load: function() { return 1 + Math.random() * 3; } },
-  { pid: "0042", name: "navi.sys",     thr: 2, load: function() { return 8 + Math.sin(performance.now() / 4000) * 4 + Math.random() * 2; } },
-  { pid: "0073", name: "psyche.drv",   thr: 1, load: function() {
+  { pid: "0001", name: "copland.os",    thr: 4, load: function() { return 1 + Math.random() * 3; } },
+  { pid: "0042", name: "navi.sys",      thr: 2, load: function() { return 8 + Math.sin(performance.now() / 4000) * 4 + Math.random() * 2; } },
+  { pid: "0073", name: "psyche.drv",    thr: 1, load: function() {
       var r = sysmonState.metrics.psycheLoad && sysmonState.metrics.psycheLoad.ring;
       return r ? (sysmonLast(r) / 10) : 2;
     }},
-  { pid: "0128", name: "protocol7.d",  thr: 1, load: function() {
+  { pid: "0128", name: "protocol7.d",   thr: 1, load: function() {
       var r = sysmonState.metrics.protocol7 && sysmonState.metrics.protocol7.ring;
       var v = r ? sysmonLast(r) : 0;
       return Math.min(15, Math.abs(v) / 6);
     }},
-  { pid: "0256", name: "schumann.mon", thr: 1, load: function() {
+  { pid: "0256", name: "schumann.mon",  thr: 1, load: function() {
       var r = sysmonState.metrics.schumann && sysmonState.metrics.schumann.ring;
       var v = r ? sysmonLast(r) : 7.83;
       return Math.abs(v - 7.83) * 100;
     }},
-  { pid: "0333", name: "wired.link",   thr: 1, load: function() {
+  { pid: "0333", name: "wired.link",    thr: 1, load: function() {
       var r = sysmonState.metrics.bandwidth && sysmonState.metrics.bandwidth.ring;
       var v = r ? sysmonLast(r) : 400;
       return Math.min(20, v / 40);
     }},
+  { pid: "0404", name: "knights.d",     thr: 2, load: function() {
+      var r = sysmonState.metrics.knights && sysmonState.metrics.knights.ring;
+      var v = r ? sysmonLast(r) : 4;
+      return Math.min(25, v / 4);
+    }},
+  { pid: "0451", name: "tachibana.sys", thr: 1, load: function() { return 2 + Math.sin(performance.now() / 9000) * 1.5 + Math.random(); } },
+  { pid: "0777", name: "lain.exe",      thr: 3, load: function() {
+      var r = sysmonState.metrics.omnipresence && sysmonState.metrics.omnipresence.ring;
+      var v = r ? sysmonLast(r) : 0.42;
+      return 1 + v * 12;
+    }},
+  { pid: "0812", name: "eiri.bin",      thr: 1, load: function() {
+      var r = sysmonState.metrics.protocol7 && sysmonState.metrics.protocol7.ring;
+      var v = r ? sysmonLast(r) : 0;
+      return Math.max(0, Math.min(8, v / 10 + 1));
+    }},
+  { pid: "1337", name: "handinavi.svc", thr: 1, load: function() { return 0.5 + Math.random() * 1.5; } },
 ];
 
 var SYSMON_REAL_PROCS = [
@@ -1675,13 +1780,36 @@ function sysmonRenderAll() {
 }
 
 // -- Lifecycle --
+// Clears any inline positioning/sizing so the panel reverts to its
+// CSS-declared default (bottom-center, 520x360). Also drops the
+// minimized class and any cached dimensions.
+function sysmonResetToDefault(panel) {
+  panel.classList.remove("minimized");
+  panel.style.top = "";
+  panel.style.left = "";
+  panel.style.right = "";
+  panel.style.bottom = "";
+  panel.style.transform = "";
+  panel.style.width = "";
+  panel.style.height = "";
+  delete panel.dataset.savedWidth;
+  delete panel.dataset.savedHeight;
+}
+
 function sysmonOpen() {
   var panel = document.getElementById("sysmon-panel");
   if (!panel) return;
+  // Re-opening from a fully-closed state always snaps back to the
+  // original default position and size — user may have dragged or
+  // resized the previous instance.
+  if (!panel.classList.contains("visible")) {
+    sysmonResetToDefault(panel);
+  }
   panel.classList.add("visible");
   bringToFront(panel);
   sysmonState.isOpen = true;
   sysmonResizeCanvas();
+  sysmonRenderBigChart();
   sysmonStart();
   updateTaskbar();
 }
@@ -1694,8 +1822,32 @@ function sysmonClose() {
   updateTaskbar();
 }
 function closeSysmon()    { sysmonClose(); }
-function minimizeSysmon() { sysmonClose(); }
-function restoreSysmon()  { sysmonOpen(); }
+function minimizeSysmon() {
+  var panel = document.getElementById("sysmon-panel");
+  if (!panel || panel.classList.contains("minimized")) return;
+  panel.dataset.savedWidth  = panel.offsetWidth  + "px";
+  panel.dataset.savedHeight = panel.offsetHeight + "px";
+  panel.style.width  = panel.offsetWidth + "px";
+  panel.style.height = panel.querySelector(".sysmon-titlebar").offsetHeight + "px";
+  panel.classList.add("minimized");
+}
+function restoreSysmon() {
+  var panel = document.getElementById("sysmon-panel");
+  if (!panel) return;
+  // If fully closed, re-open (sysmonOpen resets to default).
+  if (!panel.classList.contains("visible")) {
+    sysmonOpen();
+    return;
+  }
+  // Otherwise restore from minimized: re-apply the pre-minimize size.
+  if (panel.classList.contains("minimized")) {
+    panel.classList.remove("minimized");
+    if (panel.dataset.savedWidth)  panel.style.width  = panel.dataset.savedWidth;
+    if (panel.dataset.savedHeight) panel.style.height = panel.dataset.savedHeight;
+  }
+  sysmonResizeCanvas();
+  sysmonRenderBigChart();
+}
 function taskbarToggleSysmon() {
   if (sysmonState.isOpen) sysmonClose(); else sysmonOpen();
 }
@@ -1709,19 +1861,26 @@ function sysmonInitDrag() {
   title.addEventListener("mousedown", function(e) {
     if (e.target.classList.contains("dot")) return;
     dragging = true;
-    var rect = panel.getBoundingClientRect();
-    ox = e.clientX - rect.left;
-    oy = e.clientY - rect.top;
+    var rect   = panel.getBoundingClientRect();
+    var rpRect = getRightPanel().getBoundingClientRect();
+    panel.style.right  = "auto";
+    panel.style.bottom = "auto";
     panel.style.transform = "none";
-    panel.style.left = rect.left + "px";
-    panel.style.top  = rect.top + "px";
+    panel.style.top  = (rect.top  - rpRect.top)  / stageScale + "px";
+    panel.style.left = (rect.left - rpRect.left) / stageScale + "px";
+    ox = (e.clientX - rect.left) / stageScale;
+    oy = (e.clientY - rect.top)  / stageScale;
     panel.classList.add("dragging");
     e.preventDefault();
   });
   document.addEventListener("mousemove", function(e) {
     if (!dragging) return;
-    panel.style.left = (e.clientX - ox) + "px";
-    panel.style.top  = (e.clientY - oy) + "px";
+    var rp = getRightPanel();
+    var rpRect = rp.getBoundingClientRect();
+    var x = Math.max(0, Math.min((e.clientX - rpRect.left) / stageScale - ox, rp.offsetWidth  - panel.offsetWidth));
+    var y = Math.max(0, Math.min((e.clientY - rpRect.top)  / stageScale - oy, rp.offsetHeight - panel.offsetHeight - 40));
+    panel.style.left = x + "px";
+    panel.style.top  = y + "px";
   });
   document.addEventListener("mouseup", function() {
     if (!dragging) return;
