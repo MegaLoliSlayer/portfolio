@@ -70,6 +70,7 @@ function taskbarToggleTerminal() {
     win.classList.remove('visible');
   } else {
     win.style.cssText = '';
+    restoreDefaultLayout('terminal', win);
     win.classList.add('visible');
     const out = getOutput();
     out.textContent = '';
@@ -301,6 +302,7 @@ function taskbarToggleTv() {
     panel.style.cssText = '';
     delete panel.dataset.savedWidth;
     delete panel.dataset.savedHeight;
+    restoreDefaultLayout('tv', panel);
     panel.classList.add('visible');
   }
   updateTaskbar();
@@ -542,6 +544,7 @@ function toggleAboutPanel() {
     delete panel.dataset.savedWidth;
     delete panel.dataset.savedHeight;
     panel.classList.remove('minimized');
+    restoreDefaultLayout('about', panel);
     panel.classList.add('visible');
     bringToFront(panel);
   }
@@ -849,48 +852,146 @@ async function runBootSequence() {
   runTerminalSequence();
 }
 
+// ─── Default desktop layout ───────────────────────────────────
+// Snaps panels into the default layout after they've been opened.
+// Anchored on the music panel (playlist expanded) — measured live so
+// it adapts to the right-panel's current size. Only sets position/size
+// inline. The computed rect for each panel is cached in
+// defaultLayoutCache so toggle-off/toggle-on can restore this layout
+// instead of the CSS default.
+let defaultLayoutCache = null;
+
+function restoreDefaultLayout(key, el) {
+  if (!defaultLayoutCache || !el) return;
+  const L = defaultLayoutCache[key];
+  if (!L) return;
+  el.style.transform = 'none';
+  el.style.top       = L.top    + 'px';
+  el.style.left      = L.left   + 'px';
+  el.style.right     = 'auto';
+  el.style.bottom    = 'auto';
+  el.style.width     = L.width  + 'px';
+  el.style.height    = L.height + 'px';
+  el.style.minWidth  = '0';
+  el.style.minHeight = '0';
+  el.style.maxWidth  = 'none';
+  el.style.maxHeight = 'none';
+}
+
+function applyDefaultLayout() {
+  const rp       = document.getElementById('right-panel');
+  const music    = document.getElementById('music-panel');
+  const tv       = document.getElementById('tv-panel');
+  const sysmon   = document.getElementById('sysmon-panel');
+  const terminal = document.querySelector('.terminal-window');
+  const about    = document.getElementById('about-panel');
+  if (!rp || !music || !tv || !sysmon || !terminal || !about) return;
+
+  const rpRect    = rp.getBoundingClientRect();
+  const musicRect = music.getBoundingClientRect();
+  const musicLeft   = (musicRect.left - rpRect.left) / stageScale;
+  const musicTop    = (musicRect.top  - rpRect.top)  / stageScale;
+  const musicWidth  = musicRect.width  / stageScale;
+  const musicHeight = musicRect.height / stageScale;
+
+  function place(el, top, left, width, height) {
+    el.style.transform = 'none';
+    el.style.top       = top    + 'px';
+    el.style.left      = left   + 'px';
+    el.style.right     = 'auto';
+    el.style.bottom    = 'auto';
+    el.style.width     = width  + 'px';
+    el.style.height    = height + 'px';
+    el.style.minWidth  = '0';
+    el.style.minHeight = '0';
+    el.style.maxWidth  = 'none';
+    el.style.maxHeight = 'none';
+  }
+
+  // Lower half: sysmon — same height as music, flush from left edge
+  // of right-panel to the music panel's left edge (no gap, no overlap).
+  // Upper half: TV — same width as music, bottom edge touches music top.
+  // Upper half (left of TV): terminal (3/5 width) + about (2/5 width),
+  // both the same height as TV.
+  const leftAreaWidth = musicLeft;
+  const termWidth  = leftAreaWidth * 3 / 5;
+  const aboutWidth = leftAreaWidth * 2 / 5;
+
+  defaultLayoutCache = {
+    sysmon:   { top: musicTop, left: 0,         width: musicLeft,  height: musicHeight },
+    tv:       { top: 0,        left: musicLeft, width: musicWidth, height: musicTop    },
+    terminal: { top: 0,        left: 0,         width: termWidth,  height: musicTop    },
+    about:    { top: 0,        left: termWidth, width: aboutWidth, height: musicTop    },
+  };
+
+  place(sysmon,   defaultLayoutCache.sysmon.top,   defaultLayoutCache.sysmon.left,   defaultLayoutCache.sysmon.width,   defaultLayoutCache.sysmon.height);
+  place(tv,       defaultLayoutCache.tv.top,       defaultLayoutCache.tv.left,       defaultLayoutCache.tv.width,       defaultLayoutCache.tv.height);
+  place(terminal, defaultLayoutCache.terminal.top, defaultLayoutCache.terminal.left, defaultLayoutCache.terminal.width, defaultLayoutCache.terminal.height);
+  place(about,    defaultLayoutCache.about.top,    defaultLayoutCache.about.left,    defaultLayoutCache.about.width,    defaultLayoutCache.about.height);
+
+  // Sysmon canvas needs to re-measure its backing store at the new size
+  if (typeof sysmonResizeCanvas === 'function') sysmonResizeCanvas();
+  if (typeof sysmonRenderBigChart === 'function') sysmonRenderBigChart();
+}
+
 // ─── Screen 2: Interactive Terminal ──────────────────────────
 async function runTerminalSequence() {
   const screen2 = document.getElementById('screen2');
   const out     = getOutput();
 
   screen2.classList.add('active');
-  document.querySelector('.terminal-window').classList.add('visible');
-  await wait(200);
 
-  // Auto-run help on load so user knows the commands
+  // Pre-press the music playlist button (skip its height transition) so the
+  // music panel is already at its expanded size when we measure it.
+  const iframeWrap = document.getElementById('embed-iframe');
+  if (iframeWrap && !iframeWrap.classList.contains('playlist-expanded')) {
+    iframeWrap.style.transition = 'none';
+    iframeWrap.classList.add('playlist-expanded');
+    void iframeWrap.offsetHeight; // force reflow
+    iframeWrap.style.transition = '';
+  }
+
+  // Snap the default layout onto all panels BEFORE any of them become
+  // visible, so each first-show zoom plays within its final slot and the
+  // panels' toggle functions (which clear inline styles via cssText='')
+  // never get to wipe what we just set.
+  applyDefaultLayout();
+
+  const musicPanel = document.getElementById('music-panel');
+  const tvPanel    = document.getElementById('tv-panel');
+  const aboutPanel = document.getElementById('about-panel');
+  const sysmonPanel = document.getElementById('sysmon-panel');
+  const terminalWin = document.querySelector('.terminal-window');
+
+  // Fire all five desktop panels' first-show zoom at exactly the same
+  // instant, all using the shared .panel-first-show animation. Panels
+  // are added in their final inline-layout positions (applyDefaultLayout
+  // above) so each zoom resolves in the right slot. We add .visible
+  // directly rather than going through the toggle functions to avoid
+  // wiping the inline layout via cssText=''.
+  aboutPanel.classList.remove('minimized');
+  const bootPanels = [terminalWin, musicPanel, tvPanel, aboutPanel, sysmonPanel];
+  bootPanels.forEach(p => {
+    p.classList.add('panel-first-show');
+    p.classList.add('visible');
+  });
+  setTimeout(() => bootPanels.forEach(p => p.classList.remove('panel-first-show')), 700);
+
+  // Start sysmon sampler (skips its own reset-to-default because
+  // .visible is already set above, so our inline layout survives).
+  sysmonOpen();
+
+  updateTaskbar();
+  bringToFront(terminalWin);
+
+  // Let the zoom play, then type the auto-help into the terminal.
+  await wait(750);
   await typeText(out, 'SADAME@WIRED:~$ ', 35);
   await typeText(out, 'help', 80);
   await wait(200);
   out.insertAdjacentText('beforeend', '\n');
   await printHelp();
   out.insertAdjacentText('beforeend', '\n');
-
-  // Show music panel with first-show zoom animation
-  await wait(400);
-  const musicPanel = document.getElementById('music-panel');
-  musicPanel.classList.add('music-first-show');
-  toggleMusicPanel();
-  setTimeout(() => musicPanel.classList.remove('music-first-show'), 700);
-
-  // Show TV panel with zoom from top-right
-  await wait(150);
-  const tvPanel = document.getElementById('tv-panel');
-  tvPanel.classList.add('tv-first-show');
-  tvPanel.classList.add('visible');
-  setTimeout(() => tvPanel.classList.remove('tv-first-show'), 700);
-
-  // Show Sys-monitor panel by default (fades in via opacity transition)
-  await wait(150);
-  sysmonOpen();
-
-  updateTaskbar();
-
-  // Connections sidebar opens by default
-  toggleConnectionsSidebar();
-
-  // Make terminal the topmost window after all other panels are shown
-  bringToFront(document.querySelector('.terminal-window'));
 
   // Show interactive prompt and wire up Enter key
   showPrompt();
@@ -1794,6 +1895,9 @@ function sysmonResetToDefault(panel) {
   panel.style.height = "";
   delete panel.dataset.savedWidth;
   delete panel.dataset.savedHeight;
+  // If the default layout has been computed, snap back to it instead
+  // of the raw CSS default.
+  restoreDefaultLayout('sysmon', panel);
 }
 
 function sysmonOpen() {

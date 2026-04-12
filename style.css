@@ -607,6 +607,15 @@ html, body {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* Shared first-show zoom for all desktop panels on screen2 entry */
+.terminal-window.panel-first-show,
+#music-panel.panel-first-show,
+#tv-panel.panel-first-show,
+#about-panel.panel-first-show,
+#sysmon-panel.panel-first-show {
+  animation: music-zoomout 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
 #music-panel.visible {
   opacity: 1;
   pointer-events: auto;
@@ -1007,9 +1016,9 @@ html, body {
 }
 
 @keyframes about-zoomout {
-  0%   { transform: translateX(-50%) scale(2); opacity: 0; }
+  0%   { transform: scale(2); opacity: 0; }
   45%  { opacity: 1; }
-  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 #about-panel.dragging .about-titlebar {
